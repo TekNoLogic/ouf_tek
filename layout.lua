@@ -68,6 +68,10 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	bar.value:SetFormattedText('%d/%d', min, max)
 end
 
+local PostUpdatePower = function(self, event, bar,unit, min, max)
+	bar.value:SetFormattedText('%d/%d', min, max)
+end
+
 local backdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
@@ -132,6 +136,15 @@ local func = function(settings, self, unit)
 	ppbg:SetAllPoints(pp)
 	ppbg:SetTexture(texture)
 	pp.bg = ppbg
+
+	local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
+	ppp:SetPoint("RIGHT", self, -2, 0)
+	ppp:SetFont(GameFontNormal:GetFont(), 11)
+	ppp:SetTextColor(1, 1, 1)
+
+	pp.value = ppp
+	self.PostUpdatePower = PostUpdatePower
 
 	-- Unit name
 	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
