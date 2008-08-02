@@ -1,2 +1,2 @@
-## Interfac: 20400
+## Interface: 20400
 layout.lua
