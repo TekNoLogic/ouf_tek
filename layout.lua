@@ -201,6 +201,29 @@ local func = function(settings, self, unit)
 		self.UNIT_HAPPINESS = updateInfoString
 		self:RegisterEvent"UNIT_HAPPINESS"
 	end
+
+	-- Buffs
+	local buffs = CreateFrame("Frame", nil, self)
+	buffs:SetPoint("BOTTOM", self, "TOP")
+	buffs:SetHeight(16)
+	buffs:SetWidth(width)
+
+	buffs.size = 16
+	buffs.num = math.floor(width / buffs.size + .5)
+
+	self.Buffs = buffs
+
+	-- Debuffs
+	local debuffs = CreateFrame("Frame", nil, self)
+	debuffs:SetPoint("TOP", self, "BOTTOM")
+	debuffs:SetHeight(16)
+	debuffs:SetWidth(width)
+
+	debuffs.initialAnchor = "TOPLEFT"
+	debuffs.size = 16
+	debuffs.num = math.floor(width / debuffs.size + .5)
+
+	self.Debuffs = debuffs
 end
 
 oUF:RegisterStyle("Classic", setmetatable({
