@@ -118,7 +118,7 @@ local func = function(settings, self, unit)
 
 	self.Power = pp
 
-	-- Health bar background
+	-- Power bar background
 	local ppbg = pp:CreateTexture(nil, "BORDER")
 	ppbg:SetAllPoints(pp)
 	ppbg:SetTexture(texture)
