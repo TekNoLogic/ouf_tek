@@ -108,6 +108,7 @@ local func = function(settings, self, unit)
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	hpp:SetPoint("LEFT", hp, "RIGHT", 2, 0)
 	hpp:SetPoint("RIGHT", self, -2, 0)
+	hpp:SetJustifyH"RIGHT"
 	hpp:SetFont(GameFontNormal:GetFont(), 11)
 	hpp:SetTextColor(1, 1, 1)
 
@@ -140,6 +141,7 @@ local func = function(settings, self, unit)
 	local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
 	ppp:SetPoint("RIGHT", self, -2, 0)
+	ppp:SetJustifyH"RIGHT"
 	ppp:SetFont(GameFontNormal:GetFont(), 11)
 	ppp:SetTextColor(1, 1, 1)
 
