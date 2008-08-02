@@ -1,6 +1,7 @@
 ## Interface: 20400
 ## Title: oUF_Classic
 ## Author: Haste
+## Version: 1.0
 ## X-eMail: troeks@gmail.com
 ## Dependencies: oUF
 ## Notes: oUF layout
