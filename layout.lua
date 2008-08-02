@@ -17,6 +17,50 @@ local menu = function(self)
 	end
 end
 
+local classification = {
+	worldboss = 'B',
+	rareelite = 'R',
+	elite = '+',
+	rare = 'r',
+	normal = '',
+	trivial = 't',
+}
+
+local updateInfoString = function(self, event, unit)
+	if(unit ~= self.unit) then return end
+
+	local level = UnitLevel(unit)
+	if(level == -1) then
+		level = '??'
+	end
+
+	local class, rclass = UnitClass(unit)
+	local color = RAID_CLASS_COLORS[rclass]
+	if(not UnitIsPlayer(unit)) then
+		class = UnitCreatureFamily(unit) or UnitCreatureType(unit)
+	end
+
+	local happiness = GetPetHappiness()
+	if(happiness == 1) then
+		happiness = ":<"
+	elseif(happiness == 2) then
+		happiness = ":|"
+	elseif(happiness == 3) then
+		happiness = ":D"
+	else
+		happiness = ""
+	end
+
+	self.Info:SetFormattedText(
+		"L%s%s |cff%02x%02x%02x%s|r %s",
+		level,
+		classification[UnitClassification(unit)],
+		color.r*255, color.g*255, color.b*255,
+		class,
+		happiness
+	)
+end
+
 local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	local color = self.colors.health[0]
 	bar:SetStatusBarColor(color.r, color.g, color.b)
@@ -89,6 +133,23 @@ local func = function(settings, self, unit)
 	name:SetTextColor(1, 1, 1)
 
 	self.Name = name
+
+	-- Info string
+	local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	info:SetPoint("LEFT", 2, -1)
+	info:SetPoint("RIGHT", -2, 0)
+	info:SetJustifyH"LEFT"
+	info:SetFont(GameFontNormal:GetFont(), 11)
+	info:SetTextColor(1, 1, 1)
+
+	self.Info = info
+	self.UNIT_LEVEL = updateInfoString
+	self:RegisterEvent"UNIT_LEVEL"
+
+	if(unit == "pet") then
+		self.UNIT_HAPPINESS = updateInfoString
+		self:RegisterEvent"UNIT_HAPPINESS"
+	end
 end
 
 oUF:RegisterStyle("Classic", setmetatable({
@@ -96,6 +157,8 @@ oUF:RegisterStyle("Classic", setmetatable({
 	["initial-height"] = height,
 }, {__call = func}))
 
+-- hack to get our level information updated.
+oUF:RegisterSubTypeMapping"UNIT_LEVEL"
 oUF:SetActiveStyle"Classic"
 
 local player = oUF:Spawn"player"
