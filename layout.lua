@@ -61,15 +61,23 @@ local updateInfoString = function(self, event, unit)
 	)
 end
 
+local siValue = function(val)
+	if(val >= 1e4) then
+		return ("%.1f"):format(val / 1e3):gsub('%.', 'k')
+	else
+		return val
+	end
+end
+
 local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	local color = self.colors.health[0]
 	bar:SetStatusBarColor(color.r, color.g, color.b)
 	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
-	bar.value:SetFormattedText('%d/%d', min, max)
+	bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
 end
 
 local PostUpdatePower = function(self, event, bar,unit, min, max)
-	bar.value:SetFormattedText('%d/%d', min, max)
+	bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
 end
 
 local backdrop = {
@@ -107,9 +115,9 @@ local func = function(settings, self, unit)
 
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	hpp:SetPoint("LEFT", hp, "RIGHT", 2, 0)
-	hpp:SetPoint("RIGHT", self, -2, 0)
-	hpp:SetJustifyH"RIGHT"
-	hpp:SetFont(GameFontNormal:GetFont(), 11)
+	hpp:SetPoint("RIGHT", self, -6, 0)
+	hpp:SetJustifyH"CENTER"
+	hpp:SetFont(GameFontNormal:GetFont(), 10)
 	hpp:SetTextColor(1, 1, 1)
 
 	hp.value = hpp
@@ -140,9 +148,9 @@ local func = function(settings, self, unit)
 
 	local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
-	ppp:SetPoint("RIGHT", self, -2, 0)
-	ppp:SetJustifyH"RIGHT"
-	ppp:SetFont(GameFontNormal:GetFont(), 11)
+	ppp:SetPoint("RIGHT", self, -6, 0)
+	ppp:SetJustifyH"CENTER"
+	ppp:SetFont(GameFontNormal:GetFont(), 10)
 	ppp:SetTextColor(1, 1, 1)
 
 	pp.value = ppp
