@@ -79,6 +79,16 @@ local func = function(settings, self, unit)
 	ppbg:SetAllPoints(pp)
 	ppbg:SetTexture(texture)
 	pp.bg = ppbg
+
+	-- Unit name
+	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	name:SetPoint("LEFT", 2, -1)
+	name:SetPoint("RIGHT", -2, 0)
+	name:SetJustifyH"LEFT"
+	name:SetFont(GameFontNormal:GetFont(), 11)
+	name:SetTextColor(1, 1, 1)
+
+	self.Name = name
 end
 
 oUF:RegisterStyle("Classic", setmetatable({
