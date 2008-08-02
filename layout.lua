@@ -73,11 +73,30 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	local color = self.colors.health[0]
 	bar:SetStatusBarColor(color.r, color.g, color.b)
 	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
-	bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+
+	if(UnitIsDead(unit)) then
+		bar:SetValue(0)
+		bar.value:SetText"Dead"
+	elseif(UnitIsGhost(unit)) then
+		bar:SetValue(0)
+		bar.value:SetText"Ghost"
+	elseif(not UnitIsConnected(unit)) then
+		bar.value:SetText"Offline"
+	else
+		bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+	end
 end
 
 local PostUpdatePower = function(self, event, bar,unit, min, max)
-	bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+	if(min == 0) then
+		bar.value:SetText()
+	elseif(UnitIsDead(unit) or UnitIsGhost(unit)) then
+		bar:SetValue(0)
+	elseif(not UnitIsConnected(unit)) then
+		bar.value:SetText()
+	else
+		bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+	end
 end
 
 local backdrop = {
@@ -195,3 +214,6 @@ oUF:SetActiveStyle"Classic"
 
 local player = oUF:Spawn"player"
 player:SetPoint("CENTER", 0, -400)
+
+local player = oUF:Spawn"target"
+player:SetPoint("CENTER", 0, -300)
