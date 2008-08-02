@@ -40,7 +40,7 @@ local func = function(settings, self, unit)
 
 	self:SetBackdrop(backdrop)
 	self:SetBackdropColor(0, 0, 0, 1)
-	self:SetBackdropBorderColor(.5, .5, .5, 1)
+	self:SetBackdropBorderColor(.3, .3, .3, 1)
 
 	-- Health bar
 	local hp = CreateFrame"StatusBar"
@@ -49,8 +49,8 @@ local func = function(settings, self, unit)
 	hp:SetStatusBarTexture(texture)
 
 	hp:SetParent(self)
-	hp:SetPoint("TOP", 0, -6)
-	hp:SetPoint("LEFT", 6, 0)
+	hp:SetPoint("TOP", 0, -8)
+	hp:SetPoint("LEFT", 8, 0)
 
 	self.Health = hp
 	-- We have to override for now...
@@ -61,6 +61,24 @@ local func = function(settings, self, unit)
 	hpbg:SetAllPoints(hp)
 	hpbg:SetTexture(texture)
 	hp.bg = hpbg
+
+	-- Power bar
+	local pp = CreateFrame"StatusBar"
+	pp:SetWidth(width - 90)
+	pp:SetHeight(14)
+	pp:SetStatusBarTexture(texture)
+
+	pp:SetParent(self)
+	pp:SetPoint("BOTTOM", 0, 8)
+	pp:SetPoint("LEFT", 8, 0)
+
+	self.Power = pp
+
+	-- Health bar background
+	local ppbg = pp:CreateTexture(nil, "BORDER")
+	ppbg:SetAllPoints(pp)
+	ppbg:SetTexture(texture)
+	pp.bg = ppbg
 end
 
 oUF:RegisterStyle("Classic", setmetatable({
