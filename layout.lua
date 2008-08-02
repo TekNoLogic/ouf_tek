@@ -252,7 +252,25 @@ oUF:RegisterSubTypeMapping"UNIT_LEVEL"
 oUF:SetActiveStyle"Classic"
 
 local player = oUF:Spawn"player"
-player:SetPoint("CENTER", -200, -381)
+player:SetPoint("CENTER", -200, -380)
 
 local player = oUF:Spawn"target"
-player:SetPoint("CENTER", 200, -381)
+player:SetPoint("CENTER", 200, -380)
+
+local party = oUF:Spawn("header", "oUF_Party")
+party:SetPoint("TOPLEFT", 30, -30)
+party:SetManyAttributes(
+	"showParty", true,
+	"yOffset", -40,
+	"xOffset", -40,
+	'maxColumns', 2,
+	'unitsPerColumn', 2,
+	'columnAnchorPoint', 'LEFT',
+	'columnSpacing', 15
+)
+party:Show()
+
+oUF:SetActiveStyle"Classic - Small"
+
+local tot = oUF:Spawn"targettarget"
+tot:SetPoint("CENTER", 0, -250)
