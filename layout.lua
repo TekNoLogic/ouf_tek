@@ -65,6 +65,7 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	local color = self.colors.health[0]
 	bar:SetStatusBarColor(color.r, color.g, color.b)
 	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
+	bar.value:SetFormattedText('%d/%d', min, max)
 end
 
 local backdrop = {
@@ -99,6 +100,14 @@ local func = function(settings, self, unit)
 	self.Health = hp
 	-- We have to override for now...
 	self.OverrideUpdateHealth = OverrideUpdateHealth
+
+	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+	hpp:SetPoint("LEFT", hp, "RIGHT", 2, 0)
+	hpp:SetPoint("RIGHT", self, -2, 0)
+	hpp:SetFont(GameFontNormal:GetFont(), 11)
+	hpp:SetTextColor(1, 1, 1)
+
+	hp.value = hpp
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
