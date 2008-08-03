@@ -257,8 +257,8 @@ oUF:SetActiveStyle"Classic"
 local player = oUF:Spawn"player"
 player:SetPoint("CENTER", -200, -380)
 
-local player = oUF:Spawn"target"
-player:SetPoint("CENTER", 200, -380)
+local target = oUF:Spawn"target"
+target:SetPoint("CENTER", 200, -380)
 
 local party = oUF:Spawn("header", "oUF_Party")
 party:SetPoint("TOPLEFT", 30, -30)
