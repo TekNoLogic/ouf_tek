@@ -5,6 +5,7 @@
 
 local texture = [[Interface\AddOns\oUF_Classic\textures\statusbar]]
 local height, width = 47, 260
+local UnitReactionColor = UnitReactionColor
 
 local menu = function(self)
 	local unit = self.unit:sub(1, -2)
@@ -55,7 +56,7 @@ local updateInfoString = function(self, event, unit)
 		"L%s%s |cff%02x%02x%02x%s|r %s",
 		level,
 		classification[UnitClassification(unit)],
-		color.r*255, color.g*255, color.b*255,
+		color.r * 255, color.g * 255, color.b * 255,
 		class,
 		happiness
 	)
@@ -73,6 +74,9 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	local color = self.colors.health[0]
 	bar:SetStatusBarColor(color.r, color.g, color.b)
 	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
+
+	color = UnitReactionColor[UnitReaction(unit, 'player')]
+	self:SetBackdropBorderColor(color.r, color.g, color.b)
 
 	if(UnitIsDead(unit)) then
 		bar:SetValue(0)
@@ -233,7 +237,6 @@ local func = function(settings, self, unit)
 		self.inRangeAlpha = 1
 		self.outsideRangeAlpha = .5
 	end
-
 end
 
 oUF:RegisterStyle("Classic", setmetatable({
