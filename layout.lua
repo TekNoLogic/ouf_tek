@@ -41,15 +41,16 @@ local updateInfoString = function(self, event, unit)
 		class = UnitCreatureFamily(unit) or UnitCreatureType(unit)
 	end
 
-	local happiness = GetPetHappiness()
-	if(happiness == 1) then
-		happiness = ":<"
-	elseif(happiness == 2) then
-		happiness = ":|"
-	elseif(happiness == 3) then
-		happiness = ":D"
-	else
-		happiness = ""
+	local happiness = ''
+	if(unit == 'pet') then
+		happiness = GetPetHappiness()
+		if(happiness == 1) then
+			happiness = ":<"
+		elseif(happiness == 2) then
+			happiness = ":|"
+		elseif(happiness == 3) then
+			happiness = ":D"
+		end
 	end
 
 	self.Info:SetFormattedText(
