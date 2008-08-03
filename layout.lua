@@ -260,6 +260,9 @@ oUF:SetActiveStyle"Classic"
 local player = oUF:Spawn"player"
 player:SetPoint("CENTER", -200, -380)
 
+local pet = oUF:Spawn"pet"
+pet:SetPoint('TOP', player, 'BOTTOM', 0, -16)
+
 local target = oUF:Spawn"target"
 target:SetPoint("CENTER", 200, -380)
 
