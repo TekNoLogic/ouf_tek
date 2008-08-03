@@ -41,7 +41,7 @@ local updateInfoString = function(self, event, unit)
 		class = UnitCreatureFamily(unit) or UnitCreatureType(unit)
 	end
 
-	local happiness = ''
+	local happiness
 	if(unit == 'pet') then
 		happiness = GetPetHappiness()
 		if(happiness == 1) then
@@ -59,7 +59,7 @@ local updateInfoString = function(self, event, unit)
 		classification[UnitClassification(unit)],
 		color.r * 255, color.g * 255, color.b * 255,
 		class,
-		happiness
+		happiness or ''
 	)
 end
 
