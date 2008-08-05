@@ -232,6 +232,16 @@ local func = function(settings, self, unit)
 		debuffs.num = math.floor(width / debuffs.size + .5)
 
 		self.Debuffs = debuffs
+	else
+		self:RegisterEvent"PLAYER_UPDATE_RESTING"
+		self.PLAYER_UPDATE_RESTING = function(self)
+			if(IsResting()) then
+				self:SetBackdropBorderColor(.3, .3, .8)
+			else
+				local color = UnitReactionColor[UnitReaction(unit, 'player')]
+				self:SetBackdropBorderColor(color.r, color.g, color.b)
+			end
+		end
 	end
 
 	-- Range fading on party
