@@ -244,6 +244,13 @@ local func = function(settings, self, unit)
 		end
 	end
 
+	local leader = self:CreateTexture(nil, "OVERLAY")
+	leader:SetHeight(16)
+	leader:SetWidth(16)
+	leader:SetPoint("BOTTOM", self, "TOP", 0, -5)
+	leader:SetTexture[[Interface\GroupFrame\UI-Group-LeaderIcon]]
+	self.Leader = leader
+
 	-- Range fading on party
 	if(not unit) then
 		self.Range = true
