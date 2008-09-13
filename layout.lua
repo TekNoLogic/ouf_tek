@@ -310,9 +310,17 @@ local func = function(settings, self, unit)
 	local leader = self:CreateTexture(nil, "OVERLAY")
 	leader:SetHeight(16)
 	leader:SetWidth(16)
-	leader:SetPoint("BOTTOM", self, "TOP", 0, -5)
+	leader:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 5, -5)
 	leader:SetTexture[[Interface\GroupFrame\UI-Group-LeaderIcon]]
 	self.Leader = leader
+
+	-- Raid icon
+	local ricon = self:CreateTexture(nil, "OVERLAY")
+	ricon:SetHeight(16)
+	ricon:SetWidth(16)
+	ricon:SetPoint("CENTER", self, "TOP")
+	ricon:SetTexture[[Interface\TargetingFrame\UI-RaidTargetingIcons]]
+	self.RaidIcon = ricon
 
 	-- Range fading on party
 	if(not unit) then
