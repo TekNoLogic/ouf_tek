@@ -3,8 +3,8 @@
   without any conditions, unless such conditions are required by law.
 ---------------------------------------------------------------------------]]
 
-local texture = [[Interface\AddOns\oUF_Classic\textures\statusbar]]
-local height, width = 47, 260
+local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
+local smallheight, height, width = 31, 64, 170
 local UnitReactionColor = UnitReactionColor
 local gray = {r = .3, g = .3, b = .3}
 
@@ -20,10 +20,9 @@ local menu = function(self)
 end
 
 local classification = {
-	worldboss = 'B',
-	rareelite = 'R',
+	rareelite = 'R+',
 	elite = '+',
-	rare = 'r',
+	rare = 'R',
 	normal = '',
 	trivial = 't',
 }
@@ -32,43 +31,27 @@ local updateInfoString = function(self, event, unit)
 	if(unit ~= self.unit) then return end
 
 	local level = UnitLevel(unit)
-	if(level == -1) then
-		level = '??'
-	end
+	if level == -1 then level = '??' end
 
 	local class, rclass = UnitClass(unit)
 	local color = RAID_CLASS_COLORS[rclass]
-	if(not UnitIsPlayer(unit)) then
-		class = UnitCreatureFamily(unit) or UnitCreatureType(unit)
-	end
+	if not UnitIsPlayer(unit) then class = UnitCreatureFamily(unit) or UnitCreatureType(unit) end
 
 	local happiness
 	if(unit == 'pet') then
 		happiness = GetPetHappiness()
 		if(happiness == 1) then
-			happiness = ":<"
+			happiness = ":("
 		elseif(happiness == 2) then
 			happiness = ":|"
-		elseif(happiness == 3) then
-			happiness = ":D"
 		end
 	end
 
-	self.Info:SetFormattedText(
-		"L%s%s |cff%02x%02x%02x%s|r %s",
-		level,
-		classification[UnitClassification(unit)],
-		color.r * 255, color.g * 255, color.b * 255,
-		class,
-		happiness or ''
-	)
-end
-
-local siValue = function(val)
-	if(val >= 1e4) then
-		return ("%.1f"):format(val / 1e3):gsub('%.', 'k')
+	local classifcation = UnitClassification(unit)
+	if classifcation == "worldboss" then
+		self.Info:SetFormattedText("Boss |cff%02x%02x%02x%s|r", color.r * 255, color.g * 255, color.b * 255, class)
 	else
-		return val
+		self.Info:SetFormattedText("L%s%s |cff%02x%02x%02x%s|r %s", level, classification[UnitClassification(unit)], color.r * 255, color.g * 255, color.b * 255, class, happiness or '')
 	end
 end
 
@@ -77,8 +60,10 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	bar:SetStatusBarColor(color.r, color.g, color.b)
 	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
 
-	color = UnitReactionColor[UnitReaction(unit, 'player')] or gray
-	self:SetBackdropBorderColor(color.r, color.g, color.b)
+	if unit ~= player then
+		color = (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
+		self:SetBackdropBorderColor(color.r, color.g, color.b)
+	end
 
 	if(UnitIsDead(unit)) then
 		bar:SetValue(0)
@@ -88,20 +73,26 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 		bar.value:SetText"Ghost"
 	elseif(not UnitIsConnected(unit)) then
 		bar.value:SetText"Offline"
+	elseif unit ~= "player" then
+		bar.value:SetFormattedText('%d%%', min/max*100)
+	elseif min == max then
+		bar.value:SetText(max)
 	else
-		bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+		bar.value:SetFormattedText('|cffff0000%s|r', min-max)
 	end
 end
 
 local PostUpdatePower = function(self, event, bar,unit, min, max)
-	if(min == 0) then
-		bar.value:SetText()
-	elseif(UnitIsDead(unit) or UnitIsGhost(unit)) then
-		bar:SetValue(0)
-	elseif(not UnitIsConnected(unit)) then
-		bar.value:SetText()
-	else
-		bar.value:SetFormattedText('%s/%s', siValue(min), siValue(max))
+	if min == 0 or UnitIsDead(unit) or UnitIsGhost(unit) or not UnitIsConnected(unit) then bar:SetValue(0) end
+
+	if bar.value then
+		if min == 0 or UnitIsDead(unit) or UnitIsGhost(unit) or not UnitIsConnected(unit) then
+			bar.value:SetText()
+		elseif min >= max then
+			bar.value:SetText(max == 100 and "" or max)
+		else
+			bar.value:SetFormattedText('%d%%', min/max*100)
+		end
 	end
 end
 
@@ -126,7 +117,7 @@ local func = function(settings, self, unit)
 
 	-- Health bar
 	local hp = CreateFrame"StatusBar"
-	hp:SetWidth(width - 90)
+	hp:SetWidth(width - 16)
 	hp:SetHeight(14)
 	hp:SetStatusBarTexture(texture)
 
@@ -138,11 +129,8 @@ local func = function(settings, self, unit)
 	-- We have to override for now...
 	self.OverrideUpdateHealth = OverrideUpdateHealth
 
-	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	hpp:SetPoint("LEFT", hp, "RIGHT", 2, 0)
-	hpp:SetPoint("RIGHT", self, -6, 0)
-	hpp:SetJustifyH"CENTER"
-	hpp:SetFont(GameFontNormal:GetFont(), 10)
+	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+	hpp:SetPoint("RIGHT", hp, -2, 0)
 	hpp:SetTextColor(1, 1, 1)
 
 	hp.value = hpp
@@ -154,20 +142,25 @@ local func = function(settings, self, unit)
 	hp.bg = hpbg
 
 	-- Unit name
-	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-	name:SetPoint("LEFT", 2, -1)
-	name:SetPoint("RIGHT", -2, 0)
+	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+	name:SetPoint("LEFT", 2, 0)
+	name:SetPoint("RIGHT", hpp, -2, 0)
 	name:SetJustifyH"LEFT"
-	name:SetFont(GameFontNormal:GetFont(), 11)
+--~ 	name:SetFont(GameFontNormal:GetFont(), 11)
 	name:SetTextColor(1, 1, 1)
 
 	self.Name = name
 
-	if(settings.size ~= 'small') then
+	if settings.size == 'small' then
+--~ 		name:SetFont(GameFontNormal:GetFont(), 9)
+		name:SetPoint("LEFT", 2, 1)
+		hpp:SetPoint("RIGHT", hp, -2, 1)
+		hp:SetHeight(10)
+
 		-- Power bar
 		local pp = CreateFrame"StatusBar"
-		pp:SetWidth(width - 90)
-		pp:SetHeight(14)
+		pp:SetWidth(width - 16)
+		pp:SetHeight(4)
 		pp:SetStatusBarTexture(texture)
 
 		pp:SetParent(self)
@@ -182,27 +175,86 @@ local func = function(settings, self, unit)
 		ppbg:SetTexture(texture)
 		pp.bg = ppbg
 
-		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
-		ppp:SetPoint("RIGHT", self, -6, 0)
-		ppp:SetJustifyH"CENTER"
-		ppp:SetFont(GameFontNormal:GetFont(), 10)
+--~ 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+--~ 		ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
+--~ 		ppp:SetPoint("RIGHT", self, -6, 0)
+--~ 		ppp:SetJustifyH"CENTER"
+--~ 		ppp:SetFont(GameFontNormal:GetFont(), 10)
+--~ 		ppp:SetTextColor(1, 1, 1)
+
+--~ 		pp.value = ppp
+		self.PostUpdatePower = PostUpdatePower
+	else
+		-- Power bar
+		local pp = CreateFrame"StatusBar"
+		pp:SetWidth(width - 16)
+		pp:SetHeight(14)
+		pp:SetStatusBarTexture(texture)
+
+		pp:SetParent(self)
+--~ 		pp:SetPoint("BOTTOM", 0, 8)
+		pp:SetPoint("LEFT", 8, 0)
+
+		self.Power = pp
+
+		-- Power bar background
+		local ppbg = pp:CreateTexture(nil, "BORDER")
+		ppbg:SetAllPoints(pp)
+		ppbg:SetTexture(texture)
+		pp.bg = ppbg
+
+		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+--~ 		ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
+		ppp:SetPoint("RIGHT", pp, -2, 0)
+--~ 		ppp:SetJustifyH"CENTER"
+--~ 		ppp:SetFont(GameFontNormal:GetFont(), 10)
 		ppp:SetTextColor(1, 1, 1)
 
 		pp.value = ppp
 		self.PostUpdatePower = PostUpdatePower
 
 		-- Info string
-		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		info:SetPoint("LEFT", 2, -1)
-		info:SetPoint("RIGHT", -2, 0)
+		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+		info:SetPoint("LEFT", 2, 0)
+		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
-		info:SetFont(GameFontNormal:GetFont(), 11)
+--~ 		info:SetFont(GameFontNormal:GetFont(), 11)
 		info:SetTextColor(1, 1, 1)
 
 		self.Info = info
 		self.UNIT_LEVEL = updateInfoString
 		self:RegisterEvent"UNIT_LEVEL"
+
+		local cast = CreateFrame"StatusBar"
+		cast:SetWidth(width - 16 -14)
+		cast:SetHeight(14)
+		cast:SetStatusBarTexture(texture)
+
+		cast:SetParent(self)
+		cast:SetPoint("BOTTOM", 0, 8)
+		cast:SetPoint("LEFT", 8 + 14, 0)
+
+		local castbg = cast:CreateTexture(nil, "BORDER")
+		castbg:SetAllPoints()
+		castbg:SetTexture(texture)
+		cast.bg = castbg
+
+		local castext = cast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+		castext:SetPoint("LEFT", cast, 2, 0)
+		castext:SetTextColor(1, 1, 1)
+		cast.text = castext
+
+		local castime = cast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+		castime:SetPoint("RIGHT", cast, -2, 0)
+		castime:SetTextColor(1, 1, 1)
+		cast.casttime = castime
+
+		local casticon = cast:CreateTexture(nil, "BORDER")
+		casticon:SetPoint("RIGHT", cast, "LEFT")
+		casticon:SetWidth(14) casticon:SetHeight(14)
+		cast.icon = casticon
+
+		self.Castbar = cast
 
 		if(unit == "pet") then
 			self.UNIT_HAPPINESS = updateInfoString
@@ -213,9 +265,9 @@ local func = function(settings, self, unit)
 	if(unit ~= 'player') then
 		-- Buffs
 		local buffs = CreateFrame("Frame", nil, self)
-		buffs:SetPoint("BOTTOM", self, "TOP")
+		if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
 		buffs:SetHeight(16)
-		buffs:SetWidth(width)
+		buffs:SetWidth(width/2)
 
 		buffs.size = 16
 		buffs.num = math.floor(width / buffs.size + .5)
@@ -224,11 +276,13 @@ local func = function(settings, self, unit)
 
 		-- Debuffs
 		local debuffs = CreateFrame("Frame", nil, self)
-		debuffs:SetPoint("TOP", self, "BOTTOM")
+		if settings.size == 'small' then debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT") else debuffs:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT") end
 		debuffs:SetHeight(16)
-		debuffs:SetWidth(width)
+		debuffs:SetWidth(width/2)
 
-		debuffs.initialAnchor = "TOPLEFT"
+		debuffs.initialAnchor = settings.size == 'small' and "BOTTOMRIGHT" or "TOPRIGHT"
+		debuffs["growth-x"] = "LEFT"
+--~ 		debuffs.initialAnchor = settings.size == 'small' and "BOTTOMRIGHT" or "TOPRIGHT"
 		debuffs.size = 16
 		debuffs.num = math.floor(width / debuffs.size + .5)
 
@@ -236,13 +290,23 @@ local func = function(settings, self, unit)
 	else
 		self:RegisterEvent"PLAYER_UPDATE_RESTING"
 		self.PLAYER_UPDATE_RESTING = function(self)
-			if(IsResting()) then
-				self:SetBackdropBorderColor(.3, .3, .8)
+			if InCombatLockdown() then return end
+
+			if IsResting() then
+				self:SetBackdropBorderColor(1,1,0)
 			else
-				local color = UnitReactionColor[UnitReaction(unit, 'player')]
-				self:SetBackdropBorderColor(color.r, color.g, color.b)
+				self:SetBackdropBorderColor(0,1,0)
 			end
 		end
+
+		self:RegisterEvent"PLAYER_REGEN_DISABLED"
+		self.PLAYER_REGEN_DISABLED = function(self)
+			if not UnitAffectingCombat"player" then return end
+			self:SetBackdropBorderColor(1,0,0)
+		end
+
+		self:RegisterEvent"PLAYER_REGEN_ENABLED"
+		self.PLAYER_REGEN_ENABLED = self.PLAYER_UPDATE_RESTING
 	end
 
 	local leader = self:CreateTexture(nil, "OVERLAY")
@@ -267,7 +331,7 @@ oUF:RegisterStyle("Classic", setmetatable({
 
 oUF:RegisterStyle("Classic - Small", setmetatable({
 	["initial-width"] = width,
-	["initial-height"] = height - 16,
+	["initial-height"] = smallheight,
 	["size"] = 'small',
 }, {__call = func}))
 
@@ -276,28 +340,56 @@ oUF:RegisterSubTypeMapping"UNIT_LEVEL"
 oUF:SetActiveStyle"Classic"
 
 local player = oUF:Spawn"player"
-player:SetPoint("CENTER", -200, -380)
-
-local pet = oUF:Spawn"pet"
-pet:SetPoint('TOP', player, 'BOTTOM', 0, -16)
+player:SetPoint("BOTTOMRIGHT", WorldFrame, "BOTTOM", 0, 80)
 
 local target = oUF:Spawn"target"
-target:SetPoint("CENTER", 200, -380)
-
-local party = oUF:Spawn("header", "oUF_Party")
-party:SetPoint("TOPLEFT", 30, -30)
-party:SetManyAttributes(
-	"showParty", true,
-	"yOffset", -40,
-	"xOffset", -40,
-	'maxColumns', 2,
-	'unitsPerColumn', 2,
-	'columnAnchorPoint', 'LEFT',
-	'columnSpacing', 15
-)
-party:Show()
+target:SetPoint("LEFT", player, "RIGHT")
 
 oUF:SetActiveStyle"Classic - Small"
 
-local tot = oUF:Spawn"targettarget"
-tot:SetPoint("CENTER", 0, -250)
+local pet = oUF:Spawn"pet"
+pet:SetPoint('BOTTOMRIGHT', player, 'TOPRIGHT')
+
+local focus = oUF:Spawn"focus"
+focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
+
+--~ RuneButtonIndividual6:ClearAllPoints()
+--~ RuneButtonIndividual6:SetPoint("TOPRIGHT", player, "LEFT", -2, -2)
+
+--~ RuneButtonIndividual5:ClearAllPoints()
+--~ RuneButtonIndividual5:SetPoint("BOTTOM", RuneButtonIndividual6, "TOP", 0, 4)
+
+--~ RuneButtonIndividual4:ClearAllPoints()
+--~ RuneButtonIndividual4:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
+
+--~ RuneButtonIndividual3:ClearAllPoints()
+--~ RuneButtonIndividual3:SetPoint("BOTTOM", RuneButtonIndividual4, "TOP", 0, 4)
+
+--~ RuneButtonIndividual2:ClearAllPoints()
+--~ RuneButtonIndividual2:SetPoint("RIGHT", RuneButtonIndividual4, "LEFT", -4, 0)
+
+--~ RuneButtonIndividual1:ClearAllPoints()
+--~ RuneButtonIndividual1:SetPoint("BOTTOM", RuneButtonIndividual2, "TOP", 0, 4)
+
+----------------
+
+RuneButtonIndividual4:ClearAllPoints()
+RuneButtonIndividual4:SetPoint("RIGHT", player, "LEFT", -2, 0)
+
+RuneButtonIndividual2:ClearAllPoints()
+RuneButtonIndividual2:SetPoint("BOTTOM", RuneButtonIndividual4, "TOP", 0, 4)
+
+RuneButtonIndividual6:ClearAllPoints()
+RuneButtonIndividual6:SetPoint("TOP", RuneButtonIndividual4, "BOTTOM", 0, -4)
+
+
+
+RuneButtonIndividual5:ClearAllPoints()
+RuneButtonIndividual5:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
+
+RuneButtonIndividual3:ClearAllPoints()
+RuneButtonIndividual3:SetPoint("RIGHT", RuneButtonIndividual4, "LEFT", -4, 0)
+
+RuneButtonIndividual1:ClearAllPoints()
+RuneButtonIndividual1:SetPoint("RIGHT", RuneButtonIndividual2, "LEFT", -4, 0)
+

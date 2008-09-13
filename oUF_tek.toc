@@ -1,0 +1,13 @@
+## Interface: 30000
+
+## Title: oUF_tek
+## Notes: Tekkubqs oUF layout
+## Author: Tekkub Stoutwrithe
+## Version: Alpha
+## X-Website: http://www.tekkub.net/
+## X-Email: tekkub-wow@googlegroups.com
+## X-Category: Unitframes
+
+## Dependencies: oUF, oUF_Castbar
+
+layout.lua
