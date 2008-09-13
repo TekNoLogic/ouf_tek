@@ -8,6 +8,6 @@
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Unitframes
 
-## Dependencies: oUF, oUF_Castbar
+## Dependencies: oUF
 
 layout.lua

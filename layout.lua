@@ -55,21 +55,15 @@ local updateInfoString = function(self, event, unit)
 	end
 end
 
-local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
-	local color = self.colors.health[0]
-	bar:SetStatusBarColor(color.r, color.g, color.b)
-	bar.bg:SetVertexColor(color.r * .5, color.g * .5, color.b * .5)
-
+local PostUpdateHealth = function(self, event, unit, bar, min, max)
 	if unit ~= player then
 		color = (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
 		self:SetBackdropBorderColor(color.r, color.g, color.b)
 	end
 
 	if(UnitIsDead(unit)) then
-		bar:SetValue(0)
 		bar.value:SetText"Dead"
 	elseif(UnitIsGhost(unit)) then
-		bar:SetValue(0)
 		bar.value:SetText"Ghost"
 	elseif(not UnitIsConnected(unit)) then
 		bar.value:SetText"Offline"
@@ -82,7 +76,7 @@ local OverrideUpdateHealth = function(self, event, bar, unit, min, max)
 	end
 end
 
-local PostUpdatePower = function(self, event, bar,unit, min, max)
+local PostUpdatePower = function(self, event, unit, bar, min, max)
 	if min == 0 or UnitIsDead(unit) or UnitIsGhost(unit) or not UnitIsConnected(unit) then bar:SetValue(0) end
 
 	if bar.value then
@@ -103,6 +97,7 @@ local backdrop = {
 }
 
 local func = function(settings, self, unit)
+	self.unit = unit
 	self.menu = menu
 
 	self:SetScript("OnEnter", UnitFrame_OnEnter)
@@ -125,9 +120,14 @@ local func = function(settings, self, unit)
 	hp:SetPoint("TOP", 0, -8)
 	hp:SetPoint("LEFT", 8, 0)
 
+	hp.colorTapping = true
+	hp.colorHappiness = true
+	hp.colorDisconnected = true
+	hp.colorClass = true
+	hp.colorReaction = true
+
 	self.Health = hp
-	-- We have to override for now...
-	self.OverrideUpdateHealth = OverrideUpdateHealth
+	self.PostUpdateHealth = PostUpdateHealth
 
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	hpp:SetPoint("RIGHT", hp, -2, 0)
@@ -144,15 +144,13 @@ local func = function(settings, self, unit)
 	-- Unit name
 	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	name:SetPoint("LEFT", 2, 0)
-	name:SetPoint("RIGHT", hpp, -2, 0)
+	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
---~ 	name:SetFont(GameFontNormal:GetFont(), 11)
 	name:SetTextColor(1, 1, 1)
 
 	self.Name = name
 
 	if settings.size == 'small' then
---~ 		name:SetFont(GameFontNormal:GetFont(), 9)
 		name:SetPoint("LEFT", 2, 1)
 		hpp:SetPoint("RIGHT", hp, -2, 1)
 		hp:SetHeight(10)
@@ -167,6 +165,10 @@ local func = function(settings, self, unit)
 		pp:SetPoint("BOTTOM", 0, 8)
 		pp:SetPoint("LEFT", 8, 0)
 
+		pp.colorTapping = true
+		pp.colorDisconnected = true
+		pp.colorPower = true
+
 		self.Power = pp
 
 		-- Power bar background
@@ -175,14 +177,6 @@ local func = function(settings, self, unit)
 		ppbg:SetTexture(texture)
 		pp.bg = ppbg
 
---~ 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormal")
---~ 		ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
---~ 		ppp:SetPoint("RIGHT", self, -6, 0)
---~ 		ppp:SetJustifyH"CENTER"
---~ 		ppp:SetFont(GameFontNormal:GetFont(), 10)
---~ 		ppp:SetTextColor(1, 1, 1)
-
---~ 		pp.value = ppp
 		self.PostUpdatePower = PostUpdatePower
 	else
 		-- Power bar
@@ -192,8 +186,11 @@ local func = function(settings, self, unit)
 		pp:SetStatusBarTexture(texture)
 
 		pp:SetParent(self)
---~ 		pp:SetPoint("BOTTOM", 0, 8)
 		pp:SetPoint("LEFT", 8, 0)
+
+		pp.colorTapping = true
+		pp.colorDisconnected = true
+		pp.colorPower = true
 
 		self.Power = pp
 
@@ -204,10 +201,7 @@ local func = function(settings, self, unit)
 		pp.bg = ppbg
 
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
---~ 		ppp:SetPoint("LEFT", pp, "RIGHT", 2, 0)
 		ppp:SetPoint("RIGHT", pp, -2, 0)
---~ 		ppp:SetJustifyH"CENTER"
---~ 		ppp:SetFont(GameFontNormal:GetFont(), 10)
 		ppp:SetTextColor(1, 1, 1)
 
 		pp.value = ppp
@@ -218,7 +212,6 @@ local func = function(settings, self, unit)
 		info:SetPoint("LEFT", 2, 0)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
---~ 		info:SetFont(GameFontNormal:GetFont(), 11)
 		info:SetTextColor(1, 1, 1)
 
 		self.Info = info
@@ -229,6 +222,7 @@ local func = function(settings, self, unit)
 		cast:SetWidth(width - 16 -14)
 		cast:SetHeight(14)
 		cast:SetStatusBarTexture(texture)
+		cast:SetStatusBarColor(.8, .8, 0)
 
 		cast:SetParent(self)
 		cast:SetPoint("BOTTOM", 0, 8)
@@ -237,22 +231,26 @@ local func = function(settings, self, unit)
 		local castbg = cast:CreateTexture(nil, "BORDER")
 		castbg:SetAllPoints()
 		castbg:SetTexture(texture)
+		castbg:SetVertexColor(.4, .4, 0)
 		cast.bg = castbg
-
-		local castext = cast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
-		castext:SetPoint("LEFT", cast, 2, 0)
-		castext:SetTextColor(1, 1, 1)
-		cast.text = castext
 
 		local castime = cast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 		castime:SetPoint("RIGHT", cast, -2, 0)
 		castime:SetTextColor(1, 1, 1)
-		cast.casttime = castime
+		cast.Time = castime
+
+		local castext = cast:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
+		castext:SetPoint("LEFT", cast, 2, 0)
+		castext:SetPoint("RIGHT", castime, "LEFT", -2, 0)
+		castext:SetJustifyH"LEFT"
+		castext:SetTextColor(1, 1, 1)
+		cast.Text = castext
+
 
 		local casticon = cast:CreateTexture(nil, "BORDER")
 		casticon:SetPoint("RIGHT", cast, "LEFT")
 		casticon:SetWidth(14) casticon:SetHeight(14)
-		cast.icon = casticon
+		cast.Icon = casticon
 
 		self.Castbar = cast
 
@@ -353,25 +351,6 @@ pet:SetPoint('BOTTOMRIGHT', player, 'TOPRIGHT')
 local focus = oUF:Spawn"focus"
 focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 
---~ RuneButtonIndividual6:ClearAllPoints()
---~ RuneButtonIndividual6:SetPoint("TOPRIGHT", player, "LEFT", -2, -2)
-
---~ RuneButtonIndividual5:ClearAllPoints()
---~ RuneButtonIndividual5:SetPoint("BOTTOM", RuneButtonIndividual6, "TOP", 0, 4)
-
---~ RuneButtonIndividual4:ClearAllPoints()
---~ RuneButtonIndividual4:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
-
---~ RuneButtonIndividual3:ClearAllPoints()
---~ RuneButtonIndividual3:SetPoint("BOTTOM", RuneButtonIndividual4, "TOP", 0, 4)
-
---~ RuneButtonIndividual2:ClearAllPoints()
---~ RuneButtonIndividual2:SetPoint("RIGHT", RuneButtonIndividual4, "LEFT", -4, 0)
-
---~ RuneButtonIndividual1:ClearAllPoints()
---~ RuneButtonIndividual1:SetPoint("BOTTOM", RuneButtonIndividual2, "TOP", 0, 4)
-
-----------------
 
 RuneButtonIndividual4:ClearAllPoints()
 RuneButtonIndividual4:SetPoint("RIGHT", player, "LEFT", -2, 0)
@@ -381,8 +360,6 @@ RuneButtonIndividual2:SetPoint("BOTTOM", RuneButtonIndividual4, "TOP", 0, 4)
 
 RuneButtonIndividual6:ClearAllPoints()
 RuneButtonIndividual6:SetPoint("TOP", RuneButtonIndividual4, "BOTTOM", 0, -4)
-
-
 
 RuneButtonIndividual5:ClearAllPoints()
 RuneButtonIndividual5:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
