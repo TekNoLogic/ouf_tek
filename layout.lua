@@ -369,7 +369,7 @@ local func = function(settings, self, unit)
 	if(not unit) then
 		self.Range = true
 		self.inRangeAlpha = 1
-		self.outsideRangeAlpha = .5
+		self.outsideRangeAlpha = .65
 	end
 end
 
