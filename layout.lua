@@ -272,38 +272,24 @@ local func = function(settings, self, unit)
 			auras:SetWidth(width)
 
 			auras.size = 20
-			auras.num = math.floor(width / auras.size + .5)
 			auras.initialAnchor = "LEFT"
-			auras.filter = "RAID"
---~ 			auras.buffFilter = "HELPFUL|RAID"
---~ 			auras.debuffFilter = "HARMFUL|RAID"
+			auras.buffFilter = "HARMFUL|RAID"
+			auras.debuffFilter = "HELPFUL|RAID"
 
-			self.Buffs = auras
---~ 			self.Auras = auras
-
-			local debuffs = CreateFrame("Frame", nil, self)
-			debuffs:SetPoint("CENTER", self, "CENTER")
-			debuffs:SetHeight(20)
-			debuffs:SetWidth(20)
-
---~ 			debuffs.initialAnchor = "CENTER"
-			debuffs.size = 20
-			debuffs.num = 1
-			debuffs.filter = "HARMFUL|RAID"
-
-			self.Debuffs = debuffs
+			self.Auras = auras
 
 		elseif settings.size == 'partypet' then
 			local auras = CreateFrame("Frame", nil, self)
 			auras:SetPoint("RIGHT", self, "LEFT")
-			auras:SetHeight(16)
+			auras:SetHeight(20)
 			auras:SetWidth(width)
 
-			auras.size = 16
+			auras.size = 20
 			auras.num = math.floor(width / auras.size + .5)
 			auras.initialAnchor = "RIGHT"
 			auras["growth-x"] = "LEFT"
-			auras.filter = "RAID"
+			auras.buffFilter = "HARMFUL|RAID"
+			auras.debuffFilter = "HELPFUL|RAID"
 
 			self.Auras = auras
 		else
