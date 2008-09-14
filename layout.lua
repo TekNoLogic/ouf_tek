@@ -325,6 +325,15 @@ local func = function(settings, self, unit)
 	ricon:SetTexture[[Interface\TargetingFrame\UI-RaidTargetingIcons]]
 	self.RaidIcon = ricon
 
+	-- Threat icon
+	local threat = self:CreateTexture(nil, "OVERLAY")
+	threat:SetHeight(20)
+	threat:SetWidth(20)
+	threat:SetPoint("CENTER", self, "TOPRIGHT", -4, -4)
+	threat:SetTexture([[Interface\Minimap\ObjectIcons]])
+	threat:SetTexCoord(6/8, 7/8, 1/2, 1)
+	self.Threat = threat
+
 	-- Range fading on party
 	if(not unit) then
 		self.Range = true
