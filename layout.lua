@@ -313,7 +313,7 @@ local func = function(settings, self, unit)
 	local leader = self:CreateTexture(nil, "OVERLAY")
 	leader:SetHeight(16)
 	leader:SetWidth(16)
-	leader:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 5, -5)
+	leader:SetPoint("LEFT", self, "TOPLEFT", 5, 0)
 	leader:SetTexture[[Interface\GroupFrame\UI-Group-LeaderIcon]]
 	self.Leader = leader
 
