@@ -125,7 +125,7 @@ local func = function(settings, self, unit)
 	hp.colorHappiness = true
 	hp.colorDisconnected = true
 	hp.colorClass = true
-	hp.colorReaction = true
+	hp.colorClassNPC = true
 
 	self.Health = hp
 	self.PostUpdateHealth = PostUpdateHealth
