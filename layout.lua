@@ -55,6 +55,7 @@ local updateInfoString = function(self, event, unit)
 	end
 end
 
+local partyunits = {party1 = true, party2 = true, party3 = true, party4 = true}
 local PostUpdateHealth = function(self, event, unit, bar, min, max)
 	if unit ~= player then
 		color = (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
@@ -67,7 +68,7 @@ local PostUpdateHealth = function(self, event, unit, bar, min, max)
 		bar.value:SetText"Ghost"
 	elseif(not UnitIsConnected(unit)) then
 		bar.value:SetText"Offline"
-	elseif unit ~= "player" then
+	elseif unit ~= "player" and not partyunits[unit] then
 		bar.value:SetFormattedText('%d%%', min/max*100)
 	elseif min == max then
 		bar.value:SetText(max)
@@ -151,7 +152,7 @@ local func = function(settings, self, unit)
 
 	self.Name = name
 
-	if settings.size == 'small' then
+	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
 		name:SetPoint("LEFT", 2, 1)
 		hpp:SetPoint("RIGHT", hp, -2, 1)
 		hp:SetHeight(10)
@@ -264,30 +265,59 @@ local func = function(settings, self, unit)
 	end
 
 	if(unit ~= 'player') then
-		-- Buffs
-		local buffs = CreateFrame("Frame", nil, self)
-		if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
-		buffs:SetHeight(16)
-		buffs:SetWidth(width/2)
+		if settings.size == 'party' then
+			local auras = CreateFrame("Frame", nil, self)
+			auras:SetPoint("LEFT", self, "RIGHT")
+			auras:SetHeight(20)
+			auras:SetWidth(width)
 
-		buffs.size = 16
-		buffs.num = math.floor(width / buffs.size + .5)
+			auras.size = 20
+			auras.num = math.floor(width / auras.size + .5)
+			auras.initialAnchor = "LEFT"
+			auras.buffFilter = "HELPFUL|RAID"
+--~ 			auras.debuffFilter = "HARMFUL|RAID"
 
-		self.Buffs = buffs
+			self.Auras = auras
+		elseif settings.size == 'partypet' then
+			local auras = CreateFrame("Frame", nil, self)
+			auras:SetPoint("RIGHT", self, "LEFT")
+			auras:SetHeight(16)
+			auras:SetWidth(width)
 
-		-- Debuffs
-		local debuffs = CreateFrame("Frame", nil, self)
-		if settings.size == 'small' then debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT") else debuffs:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT") end
-		debuffs:SetHeight(16)
-		debuffs:SetWidth(width/2)
+			auras.size = 16
+			auras.num = math.floor(width / auras.size + .5)
+			auras.initialAnchor = "RIGHT"
+			auras["growth-x"] = "LEFT"
+			auras.filter = "RAID"
 
-		debuffs.initialAnchor = settings.size == 'small' and "BOTTOMRIGHT" or "TOPRIGHT"
-		debuffs["growth-x"] = "LEFT"
---~ 		debuffs.initialAnchor = settings.size == 'small' and "BOTTOMRIGHT" or "TOPRIGHT"
-		debuffs.size = 16
-		debuffs.num = math.floor(width / debuffs.size + .5)
+			self.Auras = auras
+		else
+			-- Buffs
+			local buffs = CreateFrame("Frame", nil, self)
+			if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
+			buffs:SetHeight(16)
+			buffs:SetWidth(width/2)
 
-		self.Debuffs = debuffs
+			buffs.size = 16
+			buffs.num = math.floor(width / buffs.size + .5)
+			buffs["growth-y"] = settings.size == 'small' and "UP" or "DOWN"
+
+			self.Buffs = buffs
+
+			-- Debuffs
+			local debuffs = CreateFrame("Frame", nil, self)
+			if settings.size == 'small' then debuffs:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT") else debuffs:SetPoint("TOPRIGHT", self, "BOTTOMRIGHT") end
+			debuffs:SetHeight(16)
+			debuffs:SetWidth(width/2)
+
+			debuffs.initialAnchor = settings.size == 'small' and "BOTTOMRIGHT" or "TOPRIGHT"
+			debuffs["growth-x"] = "LEFT"
+			debuffs["growth-y"] = settings.size == 'small' and "UP" or "DOWN"
+			debuffs.size = 16
+			debuffs.num = math.floor(width / debuffs.size + .5)
+
+			self.Debuffs = debuffs
+		end
 	else
 		self:RegisterEvent"PLAYER_UPDATE_RESTING"
 		self.PLAYER_UPDATE_RESTING = function(self)
@@ -353,6 +383,18 @@ oUF:RegisterStyle("Classic - Small", setmetatable({
 	["size"] = 'small',
 }, {__call = func}))
 
+oUF:RegisterStyle("Classic - Party", setmetatable({
+	["initial-width"] = width,
+	["initial-height"] = smallheight,
+	["size"] = 'party',
+}, {__call = func}))
+
+oUF:RegisterStyle("Classic - PartyPet", setmetatable({
+	["initial-width"] = width,
+	["initial-height"] = smallheight,
+	["size"] = 'partypet',
+}, {__call = func}))
+
 -- hack to get our level information updated.
 oUF:RegisterSubTypeMapping"UNIT_LEVEL"
 oUF:SetActiveStyle"Classic"
@@ -371,6 +413,38 @@ pet:SetPoint('BOTTOMRIGHT', player, 'TOPRIGHT')
 local focus = oUF:Spawn"focus"
 focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 
+
+----------------------------
+--      Party frames      --
+----------------------------
+
+oUF:SetActiveStyle("Classic - Party")
+
+local party = oUF:Spawn("header", "oUF_Party")
+party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
+party:SetManyAttributes(
+	"showParty", true,
+	"yOffset", 0, -- -smallheight,
+	"xOffset", -40
+)
+party:Show()
+
+
+oUF:SetActiveStyle("Classic - PartyPet")
+
+local partypets = oUF:Spawn("header", "oUF_PartyPets", true)
+partypets:SetPoint("TOPRIGHT", party, "TOPLEFT")
+partypets:SetManyAttributes(
+	"showParty", true,
+	"yOffset", 0, -- -smallheight,
+	"xOffset", -40
+)
+partypets:Show()
+
+
+--------------------------------
+--      Rune frame reorg      --
+--------------------------------
 
 RuneButtonIndividual4:ClearAllPoints()
 RuneButtonIndividual4:SetPoint("RIGHT", player, "LEFT", -2, 0)
