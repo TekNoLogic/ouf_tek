@@ -139,6 +139,7 @@ local func = function(settings, self, unit)
 	local hpbg = hp:CreateTexture(nil, "BORDER")
 	hpbg:SetAllPoints(hp)
 	hpbg:SetTexture(texture)
+	hpbg.multiplier = .5
 	hp.bg = hpbg
 
 	-- Unit name
@@ -175,6 +176,7 @@ local func = function(settings, self, unit)
 		local ppbg = pp:CreateTexture(nil, "BORDER")
 		ppbg:SetAllPoints(pp)
 		ppbg:SetTexture(texture)
+		ppbg.multiplier = .5
 		pp.bg = ppbg
 
 		self.PostUpdatePower = PostUpdatePower
@@ -198,6 +200,7 @@ local func = function(settings, self, unit)
 		local ppbg = pp:CreateTexture(nil, "BORDER")
 		ppbg:SetAllPoints(pp)
 		ppbg:SetTexture(texture)
+		ppbg.multiplier = .5
 		pp.bg = ppbg
 
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
