@@ -7,6 +7,7 @@ local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
 local smallheight, height, width = 31, 64, 170
 local UnitReactionColor = UnitReactionColor
 local gray = {r = .3, g = .3, b = .3}
+local oUF = oUF
 
 local menu = function(self)
 	local unit = self.unit:sub(1, -2)
@@ -19,76 +20,9 @@ local menu = function(self)
 	end
 end
 
-local classification = {
-	rareelite = 'R+',
-	elite = '+',
-	rare = 'R',
-	normal = '',
-	trivial = 't',
-}
-
-local updateInfoString = function(self, event, unit)
-	if(unit ~= self.unit) then return end
-
-	local level = UnitLevel(unit)
-	if level == -1 then level = '??' end
-
-	local class, rclass = UnitClass(unit)
-	local color = RAID_CLASS_COLORS[rclass]
-	if not UnitIsPlayer(unit) then class = UnitCreatureFamily(unit) or UnitCreatureType(unit) end
-
-	local happiness
-	if(unit == 'pet') then
-		happiness = GetPetHappiness()
-		if(happiness == 1) then
-			happiness = ":("
-		elseif(happiness == 2) then
-			happiness = ":|"
-		end
-	end
-
-	local classifcation = UnitClassification(unit)
-	if classifcation == "worldboss" then
-		self.Info:SetFormattedText("Boss |cff%02x%02x%02x%s|r", color.r * 255, color.g * 255, color.b * 255, class)
-	else
-		self.Info:SetFormattedText("L%s%s |cff%02x%02x%02x%s|r %s", level, classification[UnitClassification(unit)], color.r * 255, color.g * 255, color.b * 255, class, happiness or '')
-	end
-end
-
-local partyunits = {party1 = true, party2 = true, party3 = true, party4 = true}
 local PostUpdateHealth = function(self, event, unit, bar, min, max)
-	if unit ~= player then
-		color = (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
-		self:SetBackdropBorderColor(color.r, color.g, color.b)
-	end
-
-	if(UnitIsDead(unit)) then
-		bar.value:SetText"Dead"
-	elseif(UnitIsGhost(unit)) then
-		bar.value:SetText"Ghost"
-	elseif(not UnitIsConnected(unit)) then
-		bar.value:SetText"Offline"
-	elseif unit ~= "player" and not partyunits[unit] then
-		bar.value:SetFormattedText('%d%%', min/max*100)
-	elseif min == max then
-		bar.value:SetText(max)
-	else
-		bar.value:SetFormattedText('|cffff0000%s|r', min-max)
-	end
-end
-
-local PostUpdatePower = function(self, event, unit, bar, min, max)
-	if min == 0 or UnitIsDead(unit) or UnitIsGhost(unit) or not UnitIsConnected(unit) then bar:SetValue(0) end
-
-	if bar.value then
-		if min == 0 or UnitIsDead(unit) or UnitIsGhost(unit) or not UnitIsConnected(unit) then
-			bar.value:SetText()
-		elseif min >= max then
-			bar.value:SetText(max == 100 and "" or max)
-		else
-			bar.value:SetFormattedText('%d%%', min/max*100)
-		end
-	end
+	local color = not UnitIsDeadOrGhost(unit) and (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
+	self:SetBackdropBorderColor(color.r, color.g, color.b)
 end
 
 local backdrop = {
@@ -96,6 +30,13 @@ local backdrop = {
 	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", edgeSize = 16,
 	insets = {left = 4, right = 4, top = 4, bottom = 4},
 }
+
+oUF.TagEvents["[tekhp]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
+oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return c <= 1 and "" or c >= m and oUF.Tags["[maxhp]"](u)
+	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
+
+--~ oUF.TagEvents["[pwf]"] = "UNIT_AURA"
+--~ oUF.Tags["[pwf]"] = function(u) return UnitIsPlayer(u) and (not UnitAura(u, "Power Word: Fortitude") and "PWF") or "" end
 
 local func = function(settings, self, unit)
 	self.unit = unit
@@ -133,8 +74,8 @@ local func = function(settings, self, unit)
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	hpp:SetPoint("RIGHT", hp, -2, 0)
 	hpp:SetTextColor(1, 1, 1)
+	hpp:SetText("[dead][offline][tekhp]")
 
-	hp.value = hpp
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
@@ -149,8 +90,11 @@ local func = function(settings, self, unit)
 	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
+	name:SetText("[name] [leader]")
 
-	self.Name = name
+	-- Register our tagged strings
+	self.TaggedStrings = {name, hpp}
+
 
 	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
 		name:SetPoint("LEFT", 2, 1)
@@ -180,7 +124,6 @@ local func = function(settings, self, unit)
 		ppbg.multiplier = .5
 		pp.bg = ppbg
 
-		self.PostUpdatePower = PostUpdatePower
 	else
 		-- Power bar
 		local pp = CreateFrame"StatusBar"
@@ -207,9 +150,8 @@ local func = function(settings, self, unit)
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 		ppp:SetPoint("RIGHT", pp, -2, 0)
 		ppp:SetTextColor(1, 1, 1)
-
-		pp.value = ppp
-		self.PostUpdatePower = PostUpdatePower
+		ppp:SetText("[perpp]%")
+		table.insert(self.TaggedStrings, ppp)
 
 		-- Info string
 		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
@@ -217,10 +159,8 @@ local func = function(settings, self, unit)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
 		info:SetTextColor(1, 1, 1)
-
-		self.Info = info
-		self.UNIT_LEVEL = updateInfoString
-		self:RegisterEvent"UNIT_LEVEL"
+		info:SetText("[difficulty][smartlevel] [rare] [raidcolor][smartclass]")
+		table.insert(self.TaggedStrings, info)
 
 		local cast = CreateFrame"StatusBar"
 		cast:SetWidth(width - 16 -14)
@@ -257,11 +197,6 @@ local func = function(settings, self, unit)
 		cast.Icon = casticon
 
 		self.Castbar = cast
-
-		if(unit == "pet") then
-			self.UNIT_HAPPINESS = updateInfoString
-			self:RegisterEvent"UNIT_HAPPINESS"
-		end
 	end
 
 	if(unit ~= 'player') then
@@ -320,31 +255,12 @@ local func = function(settings, self, unit)
 			self.Debuffs = debuffs
 		end
 	else
-		self:RegisterEvent"PLAYER_UPDATE_RESTING"
-		self.PLAYER_UPDATE_RESTING = function(self)
-			if InCombatLockdown() then return end
-
-			if IsResting() then
-				self:SetBackdropBorderColor(1,1,0)
-			else
-				self:SetBackdropBorderColor(0,1,0)
-			end
-		end
-
-		self:RegisterEvent"PLAYER_REGEN_DISABLED"
-		self.PLAYER_REGEN_DISABLED = function(self)
-			if not UnitAffectingCombat"player" then return end
-			self:SetBackdropBorderColor(1,0,0)
-		end
-
-		self:RegisterEvent"PLAYER_REGEN_ENABLED"
-		self.PLAYER_REGEN_ENABLED = self.PLAYER_UPDATE_RESTING
 	end
 
 	local leader = self:CreateTexture(nil, "OVERLAY")
 	leader:SetHeight(16)
 	leader:SetWidth(16)
-	leader:SetPoint("LEFT", self, "TOPLEFT", 5, 0)
+	leader:SetPoint("LEFT", self, "TOPLEFT", 15, 0)
 	leader:SetTexture[[Interface\GroupFrame\UI-Group-LeaderIcon]]
 	self.Leader = leader
 
@@ -364,6 +280,33 @@ local func = function(settings, self, unit)
 	threat:SetTexture([[Interface\Minimap\ObjectIcons]])
 	threat:SetTexCoord(6/8, 7/8, 1/2, 1)
 	self.Threat = threat
+
+	-- PvP icon
+	local pvp = self:CreateTexture(nil, "OVERLAY")
+	pvp:SetHeight(32)
+	pvp:SetWidth(32)
+	if settings.size then pvp:SetPoint("CENTER", self, "LEFT", 6, -6) else pvp:SetPoint("CENTER", self, "BOTTOMLEFT", 12, 0) end
+	self.PvP = pvp
+
+	if unit == "player" then
+		-- Resting icon
+		local rest = self:CreateTexture(nil, "OVERLAY")
+		rest:SetHeight(24)
+		rest:SetWidth(24)
+		rest:SetPoint("CENTER", self, "TOPLEFT", 5, -1)
+		rest:SetTexture([[Interface\CharacterFrame\UI-StateIcon]])
+		rest:SetTexCoord(0, 1/2, 0, 0.421875)
+		self.Resting = rest
+
+		local combat = self:CreateTexture(nil, "OVERLAY")
+		combat:SetHeight(24)
+		combat:SetWidth(24)
+		combat:SetPoint("CENTER", self, "BOTTOMRIGHT", -5, 5)
+		combat:SetTexture([[Interface\CharacterFrame\UI-StateIcon]])
+		combat:SetTexCoord(1/2, 1, 0.01, 0.5)
+		self.Combat = combat
+
+	end
 
 	-- Range fading on party
 	if(not unit) then
@@ -396,8 +339,11 @@ oUF:RegisterStyle("Classic - PartyPet", setmetatable({
 	["size"] = 'partypet',
 }, {__call = func}))
 
--- hack to get our level information updated.
-oUF:RegisterSubTypeMapping"UNIT_LEVEL"
+
+-----------------------
+--      Cluster      --
+-----------------------
+
 oUF:SetActiveStyle"Classic"
 
 local player = oUF:Spawn"player"
@@ -443,9 +389,9 @@ partypets:SetManyAttributes(
 partypets:Show()
 
 
---------------------------------
---      Rune frame reorg      --
---------------------------------
+---------------------------
+--      Rune frames      --
+---------------------------
 
 RuneButtonIndividual4:ClearAllPoints()
 RuneButtonIndividual4:SetPoint("RIGHT", player, "LEFT", -2, 0)
