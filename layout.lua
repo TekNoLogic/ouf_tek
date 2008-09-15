@@ -7,7 +7,8 @@ local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
 local smallheight, height, width = 31, 64, 170
 local UnitReactionColor = UnitReactionColor
 local gray = {r = .3, g = .3, b = .3}
-local oUF = oUF
+local oUF = tekoUFembed
+tekoUFembed = nil
 
 local menu = function(self)
 	local unit = self.unit:sub(1, -2)

@@ -8,6 +8,7 @@
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Unitframes
 
-## Dependencies: oUF
+## X-oUF: tekoUFembed
 
+oUF_embed\oUF.xml
 layout.lua
