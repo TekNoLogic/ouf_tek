@@ -32,12 +32,64 @@ local backdrop = {
 	insets = {left = 4, right = 4, top = 4, bottom = 4},
 }
 
+
+---------------------------
+--      Custom tags      --
+---------------------------
+
 oUF.TagEvents["[tekhp]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
 oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return c <= 1 and "" or c >= m and oUF.Tags["[maxhp]"](u)
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
---~ oUF.TagEvents["[pwf]"] = "UNIT_AURA"
---~ oUF.Tags["[pwf]"] = function(u) return UnitIsPlayer(u) and (not UnitAura(u, "Power Word: Fortitude") and "PWF") or "" end
+
+local auratag = "[tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]"
+
+oUF.Tags["[tekmd]"]     = function(u) return UnitAura(u, "Misdirection")           and "|cff8E79FEMD|r"  or "" end
+oUF.Tags["[tekss]"]     = function(u) return UnitAura(u, "Soulstone Resurrection") and "|cffCA21FFSs|r"  or "" end
+oUF.Tags["[tekinn]"]    = function(u) return UnitAura(u, "Innervate")              and "|cff00FF33Inn|r" or "" end
+oUF.Tags["[tekpws]"]    = function(u) return UnitAura(u, "Power Word: Shield")     and "|cffFFD800PwS|r" or "" end
+oUF.Tags["[tekrenew]"]  = function(u) return UnitAura(u, "Renew")                  and "|cff00FF10Rn|r"  or "" end
+oUF.Tags["[tekfood]"]   = function(u) return UnitAura(u, "Food")                   and "|cffD79A6DFoo|r" or "" end
+oUF.Tags["[tekdrink]"]  = function(u) return UnitAura(u, "Drink")                  and "|cff00A1DEDr|r"  or "" end
+oUF.Tags["[tekms]"]     = function(u) return UnitAura(u, "Mortal Strike")          and "|cffFF1111Ms|r"  or "" end
+oUF.Tags["[tekws]"]     = function(u) return UnitDebuff(u, "Weakened Soul")        and "|cffFF5500Ws|r"  or "" end
+oUF.Tags["[tekfw]"]     = function(u) return UnitAura(u, "Fear Ward")              and "|cff9900FFFW|r"  or "" end
+oUF.Tags["[tekpom]"]    = function(u) local c = select(4, UnitAura(u, "Prayer of Mending")) return c and "|cffFFCF7FPoM("..c..")|r" or "" end
+oUF.Tags["[teklb]"]     = function(u) local c = select(4, UnitAura(u, "Lifebloom"))         return c and "|cffA7FD0ALB("..c..")|r"  or "" end
+oUF.Tags["[tekrejuv]"]  = function(u) return UnitAura(u, "Rejuvenation")           and "|cff00FEBFRej|r" or "" end
+oUF.Tags["[tekregrow]"] = function(u) return UnitAura(u, "Regrowth")               and "|cff00FF10Rg|r"  or "" end
+oUF.Tags["[tekflour]"]  = function(u) return UnitAura(u, "Flourish")               and "|cff33FF33Fl|r"  or "" end
+
+--~ "Curse" "|cff9900FFCu|r"
+--~ "Poison" "|cff009900Po|r"
+--~ 	"Disease" "|cff996600Di|r"
+--~ 	"Magic" "|cff3399FFMa|r"
+
+oUF.TagEvents["[tekmd]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekss]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekinn]"]    = "UNIT_AURA"
+oUF.TagEvents["[tekpws]"]    = "UNIT_AURA"
+oUF.TagEvents["[tekrenew]"]  = "UNIT_AURA"
+oUF.TagEvents["[tekfood]"]   = "UNIT_AURA"
+oUF.TagEvents["[tekdrink]"]  = "UNIT_AURA"
+oUF.TagEvents["[tekms]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekws]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekfw]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekpom]"]    = "UNIT_AURA"
+oUF.TagEvents["[teklb]"]     = "UNIT_AURA"
+oUF.TagEvents["[tekrejuv]"]  = "UNIT_AURA"
+oUF.TagEvents["[tekregrow]"] = "UNIT_AURA"
+oUF.TagEvents["[tekflour]"]  = "UNIT_AURA"
+
+--~ local _, class = UnitClass("player")
+--~ if class == "PRIEST" then
+--~ elseif class == "DRUID" then
+--~ end
+
+
+------------------------------
+--      Layout factory      --
+------------------------------
 
 local func = function(settings, self, unit)
 	self.unit = unit
@@ -77,6 +129,10 @@ local func = function(settings, self, unit)
 	hpp:SetTextColor(1, 1, 1)
 	hpp:SetText("[dead][offline][tekhp]")
 
+	local auras = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+	auras:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
+	auras:SetTextColor(1, 1, 1)
+	auras:SetText(auratag)
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
@@ -88,14 +144,13 @@ local func = function(settings, self, unit)
 	-- Unit name
 	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	name:SetPoint("LEFT", 2, 0)
-	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
+	name:SetPoint("RIGHT", auras, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
 	name:SetText("[name] [leader]")
 
 	-- Register our tagged strings
-	self.TaggedStrings = {name, hpp}
-
+	self.TaggedStrings = {name, hpp, auras}
 
 	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
 		name:SetPoint("LEFT", 2, 1)
