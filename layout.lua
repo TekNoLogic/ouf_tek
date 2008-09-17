@@ -42,7 +42,7 @@ oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) r
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
 
-local auratag = "[tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]"
+local auratag = "[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]"
 
 oUF.Tags["[tekmd]"]     = function(u) return UnitAura(u, "Misdirection")           and "|cff8E79FEMD|r"  or "" end
 oUF.Tags["[tekss]"]     = function(u) return UnitAura(u, "Soulstone Resurrection") and "|cffCA21FFSs|r"  or "" end
@@ -60,10 +60,18 @@ oUF.Tags["[tekrejuv]"]  = function(u) return UnitAura(u, "Rejuvenation")        
 oUF.Tags["[tekregrow]"] = function(u) return UnitAura(u, "Regrowth")               and "|cff00FF10Rg|r"  or "" end
 oUF.Tags["[tekflour]"]  = function(u) return UnitAura(u, "Flourish")               and "|cff33FF33Fl|r"  or "" end
 
---~ "Curse" "|cff9900FFCu|r"
---~ "Poison" "|cff009900Po|r"
---~ 	"Disease" "|cff996600Di|r"
---~ 	"Magic" "|cff3399FFMa|r"
+local function HasDebuffType(unit, t)
+	for i=1,40 do
+		local name, _, _, _, debuffType = UnitDebuff(unit, i)
+		if not name then return
+		elseif debuffType == t then return true end
+	end
+end
+
+oUF.Tags["[tekdisease]"] = function(u) return HasDebuffType(u, "Disease") and "|cff996600Di|r" or "" end
+oUF.Tags["[tekmagic]"]   = function(u) return HasDebuffType(u, "Magic")   and "|cff3399FFMa|r" or "" end
+oUF.Tags["[tekcurse]"]   = function(u) return HasDebuffType(u, "Curse")   and "|cff9900FFCu|r" or "" end
+oUF.Tags["[tekpoison]"]  = function(u) return HasDebuffType(u, "Poison")  and "|cff009900Po|r" or "" end
 
 oUF.TagEvents["[tekmd]"]     = "UNIT_AURA"
 oUF.TagEvents["[tekss]"]     = "UNIT_AURA"
@@ -81,10 +89,10 @@ oUF.TagEvents["[tekrejuv]"]  = "UNIT_AURA"
 oUF.TagEvents["[tekregrow]"] = "UNIT_AURA"
 oUF.TagEvents["[tekflour]"]  = "UNIT_AURA"
 
---~ local _, class = UnitClass("player")
---~ if class == "PRIEST" then
---~ elseif class == "DRUID" then
---~ end
+oUF.TagEvents["[tekdisease]"] = "UNIT_AURA"
+oUF.TagEvents["[tekmagic]"]   = "UNIT_AURA"
+oUF.TagEvents["[tekcurse]"]   = "UNIT_AURA"
+oUF.TagEvents["[tekpoison]"]  = "UNIT_AURA"
 
 
 ------------------------------
