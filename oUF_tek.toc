@@ -10,5 +10,6 @@
 
 ## X-oUF: tekoUFembed
 
+wrathfix.lua
 oUF_embed\oUF.xml
 layout.lua
