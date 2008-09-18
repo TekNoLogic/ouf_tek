@@ -42,8 +42,6 @@ oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) r
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
 
-local auratag = "[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]"
-
 oUF.Tags["[tekmd]"]     = function(u) return UnitAura(u, "Misdirection")           and "|cff8E79FEMD|r"  or "" end
 oUF.Tags["[tekss]"]     = function(u) return UnitAura(u, "Soulstone Resurrection") and "|cffCA21FFSs|r"  or "" end
 oUF.Tags["[tekinn]"]    = function(u) return UnitAura(u, "Innervate")              and "|cff00FF33Inn|r" or "" end
@@ -137,11 +135,6 @@ local func = function(settings, self, unit)
 	hpp:SetTextColor(1, 1, 1)
 	hpp:SetText("[dead][offline][tekhp]")
 
-	local auras = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-	auras:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
-	auras:SetTextColor(1, 1, 1)
-	auras:SetText(auratag)
-
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
 	hpbg:SetAllPoints(hp)
@@ -152,13 +145,13 @@ local func = function(settings, self, unit)
 	-- Unit name
 	local name = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	name:SetPoint("LEFT", 2, 0)
-	name:SetPoint("RIGHT", auras, "LEFT", -2, 0)
+	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
 	name:SetText("[name] [leader]")
 
 	-- Register our tagged strings
-	self.TaggedStrings = {name, hpp, auras}
+	self.TaggedStrings = {name, hpp}
 
 	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
 		name:SetPoint("LEFT", 2, 1)
@@ -265,33 +258,13 @@ local func = function(settings, self, unit)
 
 	if(unit ~= 'player') then
 		if settings.size == 'party' then
-			local auras = CreateFrame("Frame", nil, self)
+			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
-			auras:SetHeight(20)
-			auras:SetWidth(width)
+			auras:SetTextColor(1, 1, 1)
+			auras:SetText("[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]")
+			table.insert(self.TaggedStrings, aura)
 
-			auras.size = 20
-			auras.initialAnchor = "LEFT"
-			auras.buffFilter = "HARMFUL|RAID"
-			auras.debuffFilter = "HELPFUL|RAID"
-
-			self.Auras = auras
-
-		elseif settings.size == 'partypet' then
-			local auras = CreateFrame("Frame", nil, self)
-			auras:SetPoint("RIGHT", self, "LEFT")
-			auras:SetHeight(20)
-			auras:SetWidth(width)
-
-			auras.size = 20
-			auras.num = math.floor(width / auras.size + .5)
-			auras.initialAnchor = "RIGHT"
-			auras["growth-x"] = "LEFT"
-			auras.buffFilter = "HARMFUL|RAID"
-			auras.debuffFilter = "HELPFUL|RAID"
-
-			self.Auras = auras
-		else
+		elseif settings.size ~= 'partypet' then
 			-- Buffs
 			local buffs = CreateFrame("Frame", nil, self)
 			if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
