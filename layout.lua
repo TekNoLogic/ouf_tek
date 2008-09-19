@@ -38,7 +38,7 @@ local backdrop = {
 ---------------------------
 
 oUF.TagEvents["[tekhp]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
-oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return c <= 1 and "" or c >= m and oUF.Tags["[maxhp]"](u)
+oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return (c <= 1 or not UnitIsConnected(u)) and "" or c >= m and oUF.Tags["[maxhp]"](u)
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
 
@@ -262,7 +262,7 @@ local func = function(settings, self, unit)
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
 			auras:SetText("[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]")
-			table.insert(self.TaggedStrings, aura)
+			table.insert(self.TaggedStrings, auras)
 
 		elseif settings.size ~= 'partypet' then
 			-- Buffs
