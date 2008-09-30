@@ -25,7 +25,7 @@
 	 will disable the above color settings.
 	 - :PostUpdatePower(event, unit, bar, min, max)
 --]]
-local parent = debugstack():match[[AddOns\(.-)\]]
+local parent = debugstack():match[[\AddOns\(.-)\]]
 local global = GetAddOnMetadata(parent, 'X-oUF')
 assert(global, 'X-oUF needs to be defined in the parent add-on.')
 local oUF = _G[global]
@@ -85,7 +85,11 @@ function oUF:UNIT_MAXMANA(event, unit)
 			local _, class = UnitClass(unit)
 			t = self.colors.class[class]
 		elseif(bar.colorReaction) then
-			t = self.colors.reaction[UnitReaction(unit, "player")]
+			if(not wotlk) then
+				t = self.colors.reaction[UnitReaction(unit, "player")]
+			else
+				r, g, b = UnitSelectionColor(unit)
+			end
 		elseif(bar.colorSmooth) then
 			r, g, b = self.ColorGradient(min / max, unpack(bar.smoothGradient or self.colors.smooth))
 		end
