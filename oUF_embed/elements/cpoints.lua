@@ -3,22 +3,13 @@ local global = GetAddOnMetadata(parent, 'X-oUF')
 assert(global, 'X-oUF needs to be defined in the parent add-on.')
 local oUF = _G[global]
 
-local wotlk = select(4, GetBuildInfo()) >= 3e4
 local GetComboPoints = GetComboPoints
 local MAX_COMBO_POINTS = MAX_COMBO_POINTS
 
-local ename
-if(wotlk) then
-	ename = 'UNIT_COMBO_POINTS'
-else
-	ename = 'PLAYER_COMBO_POINTS'
-end
-
--- TODO: This shouldn't be hardcoded in wotlk.
-oUF[ename] = function(self, event, unit)
-	if(wotlk and unit ~= 'player') then return end
-	local cp = GetComboPoints('player', 'target')
+function oUF:UNIT_COMBO_POINTS(event, unit)
 	local cpoints = self.CPoints
+	if(self.unit ~= unit and (cpoints.unit and cpoints.unit ~= unit)) then return end
+	local cp = GetComboPoints(cpoints.unit or unit, 'target')
 
 	if(#cpoints == 0) then
 		cpoints:SetText((cp > 0) and cp)
@@ -33,9 +24,9 @@ oUF[ename] = function(self, event, unit)
 	end
 end
 
-table.insert(oUF.subTypes, function(self, unit)
-	if(self.CPoints and unit == "target") then
-		self:RegisterEvent(ename)
+table.insert(oUF.subTypes, function(self)
+	if(self.CPoints) then
+		self:RegisterEvent'UNIT_COMBO_POINTS'
 	end
 end)
-oUF:RegisterSubTypeMapping(ename)
+oUF:RegisterSubTypeMapping'UNIT_COMBO_POINTS'
