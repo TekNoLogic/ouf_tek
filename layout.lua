@@ -134,7 +134,7 @@ local func = function(settings, self, unit)
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	hpp:SetPoint("RIGHT", hp, -2, 0)
 	hpp:SetTextColor(1, 1, 1)
-	hpp:SetText("[dead][offline][tekhp]")
+	self:Tag(hpp, "[dead][offline][tekhp]")
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
@@ -149,10 +149,7 @@ local func = function(settings, self, unit)
 	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
-	name:SetText("[name] [leader]")
-
-	-- Register our tagged strings
-	self.TaggedStrings = {name, hpp}
+	self:Tag(name, "[name] [leader]")
 
 	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
 		name:SetPoint("LEFT", 2, 1)
@@ -209,8 +206,7 @@ local func = function(settings, self, unit)
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 		ppp:SetPoint("RIGHT", pp, -2, 0)
 		ppp:SetTextColor(1, 1, 1)
-		ppp:SetText("[perpp]%")
-		table.insert(self.TaggedStrings, ppp)
+		self:Tag(ppp, "[perpp]%")
 
 		-- Info string
 		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
@@ -218,8 +214,7 @@ local func = function(settings, self, unit)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
 		info:SetTextColor(1, 1, 1)
-		info:SetText("[difficulty][smartlevel] [rare] [raidcolor][smartclass]")
-		table.insert(self.TaggedStrings, info)
+		self:Tag(info, "[difficulty][smartlevel] [rare] [raidcolor][smartclass]")
 
 		local cast = CreateFrame"StatusBar"
 		cast:SetWidth(width - 16 -14)
@@ -263,8 +258,7 @@ local func = function(settings, self, unit)
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
-			auras:SetText("[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]")
-			table.insert(self.TaggedStrings, auras)
+			self:Tag(auras, "[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]")
 
 		elseif settings.size ~= 'partypet' then
 			-- Buffs
