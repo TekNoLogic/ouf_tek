@@ -126,6 +126,7 @@ local func = function(settings, self, unit)
 	hp.colorDisconnected = true
 	hp.colorClass = true
 	hp.colorClassNPC = true
+	hp.frequentUpdates = true
 
 	self.Health = hp
 	self.PostUpdateHealth = PostUpdateHealth
@@ -194,6 +195,7 @@ local func = function(settings, self, unit)
 		pp.colorTapping = true
 		pp.colorDisconnected = true
 		pp.colorPower = true
+		pp.frequentUpdates = true
 
 		self.Power = pp
 
