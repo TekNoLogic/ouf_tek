@@ -2,7 +2,7 @@ local parent = debugstack():match[[\AddOns\(.-)\]]
 local global = GetAddOnMetadata(parent, 'X-oUF')
 assert(global, 'X-oUF needs to be defined in the parent add-on.')
 
-local _VERSION = '1.2.2'
+local _VERSION = '1.3'
 
 local print = function(a) ChatFrame1:AddMessage("|cff33ff99oUF:|r "..tostring(a)) end
 local error = function(...) print("|cffff0000Error:|r "..string.format(...)) end
@@ -49,8 +49,14 @@ end
 
 -- add-on object
 local oUF = CreateFrame"Button"
-local RegisterEvent = oUF.RegisterEvent
-local metatable = {__index = oUF}
+local frame_metatable = {__index = oUF}
+local event_metatable = {
+	__call = function(funcs, self, ...)
+		for _, func in ipairs(funcs) do
+			func(self, ...)
+		end
+	end,
+}
 
 local styles, style = {}
 local callback, units, objects = {}, {}, {}
@@ -60,10 +66,7 @@ local	_G, select, type, tostring, math_modf =
 local	UnitExists, UnitName =
 		UnitExists, UnitName
 
-local subTypes = {}
-local subTypesMapping = {
-	"UNIT_NAME_UPDATE",
-}
+local elements = {}
 
 local enableTargetUpdate = function(object)
 	-- updating of "invalid" units.
@@ -87,7 +90,7 @@ end
 
 -- Events
 local OnEvent = function(self, event, ...)
-	if(not self:IsShown()) then return end
+	if(not self:IsShown() and not self.__unit) then return end
 	self[event](self, event, ...)
 end
 
@@ -144,7 +147,7 @@ local HandleUnit = function(unit, object)
 		ComboFrame:Hide()
 
 		-- Enable our shit
-		object:RegisterEvent"PLAYER_TARGET_CHANGED"
+		object:RegisterEvent("PLAYER_TARGET_CHANGED", 'PLAYER_ENTERING_WORLD')
 	elseif(unit == "focus") then
 		FocusFrame:UnregisterAllEvents()
 		FocusFrame.Show = dummy
@@ -154,9 +157,9 @@ local HandleUnit = function(unit, object)
 		FocusFrameManaBar:UnregisterAllEvents()
 		FocusFrameSpellBar:UnregisterAllEvents()
 
-		object:RegisterEvent"PLAYER_FOCUS_CHANGED"
+		object:RegisterEvent("PLAYER_FOCUS_CHANGED", 'PLAYER_ENTERING_WORLD')
 	elseif(unit == "mouseover") then
-		object:RegisterEvent"UPDATE_MOUSEOVER_UNIT"
+		object:RegisterEvent("UPDATE_MOUSEOVER_UNIT", 'PLAYER_ENTERING_WORLD')
 	elseif(unit:match"target") then
 		-- Hide the blizzard stuff
 		if(unit == "targettarget") then
@@ -189,7 +192,9 @@ local initObject = function(unit, style, ...)
 	for i=1, num do
 		local object = select(i, ...)
 
-		object = setmetatable(object, metatable)
+		object.__elements = {}
+
+		object = setmetatable(object, frame_metatable)
 		style(object, unit)
 
 		local mt = type(style) == 'table'
@@ -228,8 +233,8 @@ local initObject = function(unit, style, ...)
 
 		object:RegisterEvent"PLAYER_ENTERING_WORLD"
 
-		for _, func in ipairs(subTypes) do
-			func(object, unit)
+		for element in pairs(elements) do
+			object:EnableElement(element, unit)
 		end
 
 		for _, func in ipairs(callback) do
@@ -308,14 +313,95 @@ function oUF:Spawn(unit, name, template, disableBlizz)
 	return object
 end
 
-function oUF:RegisterSubTypeMapping(event)
-	for _, map in ipairs(subTypesMapping) do
-		if(map == event) then
-			return
-		end
+local RegisterEvent = oUF.RegisterEvent
+function oUF:RegisterEvent(event, func)
+	if(not event) then return error('<TODO:event>') end
+
+	if(type(func) == 'string' and type(self[func]) == 'function') then
+		func = self[func]
 	end
 
-	table.insert(subTypesMapping, event)
+	local curev = self[event]
+	if(curev and func) then
+		if(type(curev) == 'function') then
+			self[event] = setmetatable({curev, func}, event_metatable)
+		else
+			for _, infunc in ipairs(curev) do
+				if(infunc == func) then return end
+			end
+
+			table.insert(curev, func)
+		end
+	elseif(self:IsEventRegistered(event)) then
+		return
+	else
+		if(func) then
+			self[event] = func
+		end
+
+		RegisterEvent(self, event)
+	end
+end
+
+local UnregisterEvent = oUF.UnregisterEvent
+function oUF:UnregisterEvent(event, func)
+	if(not event) then return error('<TODO:event>') end
+
+	local curev = self[event]
+	if(type(curev) == 'table' and func) then
+		for k, infunc in ipairs(curev) do
+			if(infunc == func) then
+				curev[k] = nil
+
+				if(#curev == 0) then
+					table.remove(curev, k)
+					UnregisterEvent(self, event)
+				end
+			end
+		end
+	else
+		self[event] = nil
+		UnregisterEvent(self, event)
+	end
+end
+
+function oUF:AddElement(name, update, enable, disable)
+	if(elements[name]) then return error('<TODO:element>') end
+
+	elements[name] = {
+		update = update;
+		enable = enable;
+		disable = disable;
+	}
+end
+
+function oUF:EnableElement(name, unit)
+	local element = elements[name]
+	if(not element) then return end
+
+	if(element.enable(self, unit or self.unit)) then
+		table.insert(self.__elements, element.update)
+	end
+end
+
+function oUF:DisableElement(name)
+	local element = elements[name]
+	if(not element) then return end
+
+	for k, update in ipairs(self.__elements) do
+		if(update == element.update) then
+			table.remove(self.__elements, k)
+			element.disable(self)
+			break
+		end
+	end
+end
+
+function oUF:UpdateElement(name)
+	local element = elements[name]
+	if(not element) then return end
+
+	element.update(self, 'UpdateElement', self.unit)
 end
 
 oUF.Enable = RegisterUnitWatch
@@ -333,16 +419,10 @@ function oUF:PLAYER_ENTERING_WORLD(event)
 	local unit = self.unit
 	if(not UnitExists(unit)) then return end
 
-	for _, func in ipairs(subTypesMapping) do
-		if(self:IsEventRegistered(func)) then
-			self[func](self, event, unit)
-		end
+	for _, func in ipairs(self.__elements) do
+		func(self, event, unit)
 	end
 end
-
-oUF.PLAYER_TARGET_CHANGED = oUF.PLAYER_ENTERING_WORLD
-oUF.PLAYER_FOCUS_CHANGED = oUF.PLAYER_ENTERING_WORLD
-oUF.UPDATE_MOUSEOVER_UNIT = oUF.PLAYER_ENTERING_WORLD
 
 -- http://www.wowwiki.com/ColorGradient
 function oUF.ColorGradient(perc, ...)
@@ -362,29 +442,8 @@ function oUF.ColorGradient(perc, ...)
 	return r1 + (r2-r1)*relperc, g1 + (g2-g1)*relperc, b1 + (b2-b1)*relperc
 end
 
-function oUF:PARTY_MEMBERS_CHANGED(event)
-	if(self:IsEventRegistered"PARTY_LEADER_CHANGED") then self:PARTY_LEADER_CHANGED() end
-end
-
-function oUF:UNIT_NAME_UPDATE(event, unit)
-	if(self.unit ~= unit) then return end
-	local name = UnitName(unit)
-
-	-- This is really really temporary, at least until someone writes a tag
-	-- library that doesn't eat babies and spew poison (or any other common
-	-- solution to this problem).
-	self.Name:SetText(name)
-end
-table.insert(subTypes, function(self)
-	if(self.Name) then
-		self:RegisterEvent"UNIT_NAME_UPDATE"
-	end
-end)
-
 oUF.version = _VERSION
 oUF.units = units
 oUF.objects = objects
-oUF.subTypes = subTypes
-oUF.subTypesMapping = subTypesMapping
 oUF.colors = colors
 _G[global] = oUF
