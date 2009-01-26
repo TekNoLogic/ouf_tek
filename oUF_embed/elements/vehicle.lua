@@ -12,8 +12,14 @@ local toUnit = function(...)
 
 		for k, object in ipairs(objects) do
 			if(object.__unit == unit) then
-				object.__unit = nil
-				object:SetAttribute('unit', unit)
+
+				if(not InCombatLockdown()) then
+					object.__unit = nil
+					object:SetAttribute('unit', unit)
+				else
+					object.unit = unit
+					object:PLAYER_ENTERING_WORLD()
+				end
 			end
 		end
 	end
@@ -26,14 +32,30 @@ local toVehicle = function(aUnit, bUnit, override)
 	aFrame.__unit = aFrame.unit
 	bFrame.__unit = bFrame.unit
 
-	aFrame:SetAttribute('unit', bUnit)
-	bFrame:SetAttribute('unit', override or aUnit)
+	if(not InCombatLockdown()) then
+		aFrame:SetAttribute('unit', bUnit)
+		bFrame:SetAttribute('unit', override or aUnit)
+	else
+		-- We manually change the unit here, so we can check if it's correct when
+		-- we drop combat.
+		aFrame.unit = bUnit
+		bFrame.unit = override or aUnit
+
+		-- Force an update to all the information is correct. This is usually done
+		-- by OnAttributeChanged.
+		aFrame:PLAYER_ENTERING_WORLD()
+		bFrame:PLAYER_ENTERING_WORLD()
+	end
 end
 
 local UNIT_ENTERED_VEHICLE = function(self, event, unit)
 	if(unit ~= self.unit) then return end
 
 	if(unit == 'player' and units.pet) then
+		-- Required for BuffFrame.lua
+		PlayerFrame.unit = 'vehicle'
+		BuffFrame_Update()
+
 		toVehicle('vehicle', 'pet', 'player')
 	elseif(self.id) then
 		if(unit == 'party'..self.id and units['partypet'..self.id]) then
@@ -48,6 +70,9 @@ local UNIT_EXITED_VEHICLE = function(self, event, unit)
 	if(unit ~= self.__unit) then return end
 
 	if(unit == 'player' and units.pet) then
+		-- Required for BuffFrame.lua
+		PlayerFrame.unit = 'player'
+
 		toUnit('player', 'pet')
 	elseif(self.id) then
 		if(unit == 'party'..self.id and units['partypet'..self.id]) then
@@ -55,6 +80,15 @@ local UNIT_EXITED_VEHICLE = function(self, event, unit)
 		elseif(unit == 'raid'..self.id and units['raidpet'..self.id]) then
 			toUnit(unit, 'raidpet'..self.id)
 		end
+	end
+end
+
+-- Swap the unit - I hate this solution and hope it's me whose stupid.
+local PLAYER_REGEN_ENABLED = function(self)
+	local unit = self.unit
+	if(self:GetAttribute'unit' ~= unit) then
+		self.__unit = nil
+		self:SetAttribute('unit', unit)
 	end
 end
 
@@ -69,15 +103,20 @@ oUF:AddElement(
 
 	-- Enable
 	function(self, unit)
-		if(self.disallowVehicleSwap or unit == 'pet') then return end
+		if(self.disallowVehicleSwap) then return end
 
-		self:RegisterEvent('UNIT_ENTERED_VEHICLE', UNIT_ENTERED_VEHICLE)
-		self:RegisterEvent('UNIT_EXITED_VEHICLE', UNIT_EXITED_VEHICLE)
+		if(unit ~= 'pet') then
+			self:RegisterEvent('UNIT_ENTERED_VEHICLE', UNIT_ENTERED_VEHICLE)
+			self:RegisterEvent('UNIT_EXITED_VEHICLE', UNIT_EXITED_VEHICLE)
+		end
+
+		self:RegisterEvent('PLAYER_REGEN_ENABLED', PLAYER_REGEN_ENABLED)
 	end,
 
 	-- Disable
 	function(self)
 		self:UnregisterEvent('UNIT_ENTERED_VEHICLE', UNIT_ENTERED_VEHICLE)
 		self:UnregisterEvent('UNIT_EXITED_VEHICLE', UNIT_EXITED_VEHICLE)
+		self:UnregisterEvent('PLAYER_REGEN_ENABLED', PLAYER_REGEN_ENABLED)
 	end
 )

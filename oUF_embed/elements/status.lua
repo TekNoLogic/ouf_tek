@@ -12,16 +12,21 @@ do
 		end
 	end
 
-	local Enable = function(self)
+	local Enable = function(self, unit)
 		if(self.Resting and unit == 'player') then
 			self:RegisterEvent("PLAYER_UPDATE_RESTING", Update)
+
+			if(self.Resting:IsObjectType"Texture" and not self.Resting:GetTexture()) then
+				self.Resting:SetTexture[[Interface\CharacterFrame\UI-StateIcon]]
+				self.Resting:SetTexCoord(0, .5, 0, .421875)
+			end
 
 			return true
 		end
 	end
 
 	local Disable = function(self)
-		if(self.Resting and unit == 'player') then
+		if(self.Resting) then
 			self:UnregisterEvent("PLAYER_UPDATE_RESTING", Update)
 		end
 	end
@@ -42,6 +47,11 @@ do
 		if(self.Combat and unit == 'player') then
 			self:RegisterEvent("PLAYER_REGEN_DISABLED", Update)
 			self:RegisterEvent("PLAYER_REGEN_ENABLED", Update)
+
+			if(self.Combat:IsObjectType"Texture" and not self.Combat:GetTexture()) then
+				self.Combat:SetTexture[[Interface\CharacterFrame\UI-StateIcon]]
+				self.Combat:SetTexCoord(.5, 1, 0, .5)
+			end
 
 			return true
 		end
