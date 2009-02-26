@@ -42,21 +42,21 @@ oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) r
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
 
-oUF.Tags["[tekmd]"]     = function(u) return UnitAura(u, "Misdirection")           and "|cff8E79FEMD|r"  or "" end
-oUF.Tags["[tekss]"]     = function(u) return UnitAura(u, "Soulstone Resurrection") and "|cffCA21FFSs|r"  or "" end
-oUF.Tags["[tekinn]"]    = function(u) return UnitAura(u, "Innervate")              and "|cff00FF33Inn|r" or "" end
-oUF.Tags["[tekpws]"]    = function(u) return UnitAura(u, "Power Word: Shield")     and "|cffFFD800PwS|r" or "" end
-oUF.Tags["[tekrenew]"]  = function(u) return UnitAura(u, "Renew")                  and "|cff00FF10Rn|r"  or "" end
-oUF.Tags["[tekfood]"]   = function(u) return UnitAura(u, "Food")                   and "|cffD79A6DFoo|r" or "" end
-oUF.Tags["[tekdrink]"]  = function(u) return UnitAura(u, "Drink")                  and "|cff00A1DEDr|r"  or "" end
-oUF.Tags["[tekms]"]     = function(u) return UnitAura(u, "Mortal Strike")          and "|cffFF1111Ms|r"  or "" end
-oUF.Tags["[tekws]"]     = function(u) return UnitDebuff(u, "Weakened Soul")        and "|cffFF5500Ws|r"  or "" end
-oUF.Tags["[tekfw]"]     = function(u) return UnitAura(u, "Fear Ward")              and "|cff9900FFFW|r"  or "" end
-oUF.Tags["[tekpom]"]    = function(u) local c = select(4, UnitAura(u, "Prayer of Mending")) return c and "|cffFFCF7FPoM("..c..")|r" or "" end
-oUF.Tags["[teklb]"]     = function(u) local c = select(4, UnitAura(u, "Lifebloom"))         return c and "|cffA7FD0ALB("..c..")|r"  or "" end
-oUF.Tags["[tekrejuv]"]  = function(u) return UnitAura(u, "Rejuvenation")           and "|cff00FEBFRej|r" or "" end
-oUF.Tags["[tekregrow]"] = function(u) return UnitAura(u, "Regrowth")               and "|cff00FF10Rg|r"  or "" end
-oUF.Tags["[tekflour]"]  = function(u) return UnitAura(u, "Flourish")               and "|cff33FF33Fl|r"  or "" end
+oUF.Tags["[tekmd]"]     = function(u) if UnitAura(u, "Misdirection")           then return "|cff8E79FEMD|r" end end
+oUF.Tags["[tekss]"]     = function(u) if UnitAura(u, "Soulstone Resurrection") then return "|cffCA21FFSs|r" end end
+oUF.Tags["[tekinn]"]    = function(u) if UnitAura(u, "Innervate")              then return "|cff00FF33Inn|r" end end
+oUF.Tags["[tekpws]"]    = function(u) if UnitAura(u, "Power Word: Shield")     then return "|cffFFD800PwS|r" end end
+oUF.Tags["[tekrenew]"]  = function(u) if UnitAura(u, "Renew")                  then return "|cff00FF10Rn|r" end end
+oUF.Tags["[tekfood]"]   = function(u) if UnitAura(u, "Food")                   then return "|cffD79A6DFoo|r" end end
+oUF.Tags["[tekdrink]"]  = function(u) if UnitAura(u, "Drink")                  then return "|cff00A1DEDr|r" end end
+oUF.Tags["[tekms]"]     = function(u) if UnitAura(u, "Mortal Strike")          then return "|cffFF1111Ms|r" end end
+oUF.Tags["[tekfw]"]     = function(u) if UnitAura(u, "Fear Ward")              then return "|cff9900FFFW|r" end end
+oUF.Tags["[tekrejuv]"]  = function(u) if UnitAura(u, "Rejuvenation")           then return "|cff00FEBFRej|r" end end
+oUF.Tags["[tekregrow]"] = function(u) if UnitAura(u, "Regrowth")               then return "|cff00FF10Rg|r" end end
+oUF.Tags["[tekflour]"]  = function(u) if UnitAura(u, "Flourish")               then return "|cff33FF33Fl|r" end end
+oUF.Tags["[tekws]"]     = function(u) if UnitDebuff(u, "Weakened Soul")        then return "|cffFF5500Ws|r" end end
+oUF.Tags["[tekpom]"]    = function(u) local c = select(4, UnitAura(u, "Prayer of Mending")) if c then return "|cffFFCF7FPoM("..c..")|r" end end
+oUF.Tags["[teklb]"]     = function(u) local c = select(4, UnitAura(u, "Lifebloom"))         if c then return "|cffA7FD0ALB("..c..")|r" end end
 
 local function HasDebuffType(unit, t)
 	for i=1,40 do
@@ -214,7 +214,7 @@ local func = function(settings, self, unit)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
 		info:SetTextColor(1, 1, 1)
-		self:Tag(info, "[difficulty][smartlevel] [rare] [raidcolor][smartclass]")
+		self:Tag(info, "[difficulty][smartlevel][( )rare] [raidcolor][smartclass]")
 
 		local cast = CreateFrame"StatusBar"
 		cast:SetWidth(width - 16 -14)
@@ -258,7 +258,7 @@ local func = function(settings, self, unit)
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
-			self:Tag(auras, "[tekcurse] [tekpoison] [tekdisease] [tekmagic] [tekms] [tekmd] [tekpws] [tekws] [tekflour] [teklb] [tekregrow] [tekrejuv] [tekrenew] [tekpom] [tekss] [tekfw] [tekinn] [tekfood] [tekdrink]")
+			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
 
 		elseif settings.size ~= 'partypet' then
 			-- Buffs
