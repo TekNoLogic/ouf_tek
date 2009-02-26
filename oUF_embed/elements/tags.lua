@@ -40,7 +40,7 @@ tags = {
 	["[offline]"]     = function(u) return  (not UnitIsConnected(u) and "Offline") end,
 	["[perhp]"]       = function(u) local m = UnitHealthMax(u); return m == 0 and 0 or math.floor(UnitHealth(u)/m*100+0.5) end,
 	["[perpp]"]       = function(u) local m = UnitPowerMax(u); return m == 0 and 0 or math.floor(UnitPower(u)/m*100+0.5) end,
-	["[plus]"]        = function(u) return UnitIsPlusMob(u) and "+" end,
+	["[plus]"]        = function(u) local c = UnitClassification(u); return (c == "elite" or c == "rareelite") and "+" end,
 	["[pvp]"]         = function(u) return UnitIsPVP(u) and "PvP" end,
 	["[race]"]        = function(u) return UnitRace(u) end,
 	["[raidcolor]"]   = function(u) local _, x = UnitClass(u); return x and Hex(RAID_CLASS_COLORS[x]) end,
@@ -96,10 +96,12 @@ local tagEvents = {
 	["[pvp]"]         = "UNIT_FACTION",
 	["[resting]"]     = "PLAYER_UPDATE_RESTING",
 	["[status]"]      = "UNIT_HEALTH PLAYER_UPDATE_RESTING",
-	["[smartlevel]"]  = "UNIT_LEVEL PLAYER_LEVEL_UP",
+	["[smartlevel]"]  = "UNIT_LEVEL PLAYER_LEVEL_UP UNIT_CLASSIFICATION_CHANGED",
 	["[threat]"]      = "UNIT_THREAT_SITUATION_UPDATE",
 	["[threatcolor]"] = "UNIT_THREAT_SITUATION_UPDATE",
 	['[cpoints]']     = 'UNIT_COMBO_POINTS UNIT_TARGET',
+	["[classification]"]      = "UNIT_CLASSIFICATION_CHANGED",
+	["[shortclassification]"] = "UNIT_CLASSIFICATION_CHANGED",
 }
 
 local unitlessEvents = {
