@@ -266,7 +266,7 @@ local Tag = function(self, fs, tagstr)
 				tmp[i] = func(unit, __unit) or ''
 			end
 
-			self:SetText(string.format(format, unpack(tmp)):gsub(" +", " "))
+			self:SetFormattedText(format, unpack(tmp))
 		end
 
 		tagPool[tagstr] = func
