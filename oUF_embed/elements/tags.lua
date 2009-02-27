@@ -180,7 +180,7 @@ local tagPool = {}
 local funcPool = {}
 local tmp = {}
 
-local Tag = function(self, fs, tagstr)
+local Tag = function(self, fs, tagstr, frequent)
 	if(not fs or not tagstr or self == oUF) then return end
 
 	if(not self.__tags) then
@@ -276,7 +276,7 @@ local Tag = function(self, fs, tagstr)
 	fs.UpdateTag = func
 
 	local unit = self.unit
-	if((unit and unit:match'%w+target') or self.frequentTagUpdates) then
+	if((unit and unit:match'%w+target') or frequent) then
 		table.insert(eventlessUnits, fs)
 
 		if(not frame:GetScript'OnUpdate') then

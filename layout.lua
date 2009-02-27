@@ -206,7 +206,7 @@ local func = function(settings, self, unit)
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 		ppp:SetPoint("RIGHT", pp, -2, 0)
 		ppp:SetTextColor(1, 1, 1)
-		self:Tag(ppp, "[perpp]%")
+		self:Tag(ppp, "[perpp]%", self.unit == "player")
 
 		-- Info string
 		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
