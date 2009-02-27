@@ -41,6 +41,12 @@ oUF.TagEvents["[tekhp]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
 oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return (c <= 1 or not UnitIsConnected(u)) and "" or c >= m and oUF.Tags["[maxhp]"](u)
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
+oUF.TagEvents["[tekhp2]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
+oUF.Tags["[tekhp2]"] = function(u) if UnitHealth(u) < UnitHealthMax(u) then return "-"..oUF.Tags["[missinghp]"](u) end end
+
+oUF.TagEvents["[tekpet]"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
+oUF.Tags["[tekpet]"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return oUF.Tags["[name]"](u) end end
+
 
 oUF.Tags["[tekmd]"]     = function(u) if UnitAura(u, "Misdirection")           then return "|cff8E79FEMD|r" end end
 oUF.Tags["[tekss]"]     = function(u) if UnitAura(u, "Soulstone Resurrection") then return "|cffCA21FFSs|r" end end
@@ -113,13 +119,12 @@ local func = function(settings, self, unit)
 
 	-- Health bar
 	local hp = CreateFrame"StatusBar"
-	hp:SetWidth(width - 16)
-	hp:SetHeight(14)
 	hp:SetStatusBarTexture(texture)
 
 	hp:SetParent(self)
 	hp:SetPoint("TOP", 0, -8)
 	hp:SetPoint("LEFT", 8, 0)
+	hp:SetPoint("RIGHT", -8, 0)
 
 	hp.colorTapping = true
 	hp.colorHappiness = true
@@ -134,7 +139,7 @@ local func = function(settings, self, unit)
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	hpp:SetPoint("RIGHT", hp, -2, 0)
 	hpp:SetTextColor(1, 1, 1)
-	self:Tag(hpp, "[dead][offline][tekhp]")
+	self:Tag(hpp, settings.size == 'partypet' and "[tekhp2]" or "[dead][offline][tekhp]")
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
@@ -149,59 +154,54 @@ local func = function(settings, self, unit)
 	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
-	self:Tag(name, "[name] [leader]")
+	self:Tag(name, settings.size == 'partypet' and "[tekpet]" or "[name][leader]")
 
-	if settings.size == 'small' or settings.size == 'party' or settings.size == 'partypet' then
+	-- Power bar
+	local pp = CreateFrame"StatusBar"
+	pp:SetStatusBarTexture(texture)
+
+	pp:SetParent(self)
+	pp:SetPoint("LEFT", 8, 0)
+	pp:SetPoint("RIGHT", -8, 0)
+
+	pp.colorTapping = true
+	pp.colorDisconnected = true
+	pp.colorPower = true
+
+	self.Power = pp
+
+	-- Power bar background
+	local ppbg = pp:CreateTexture(nil, "BORDER")
+	ppbg:SetAllPoints(pp)
+	ppbg:SetTexture(texture)
+	ppbg.multiplier = .5
+	pp.bg = ppbg
+
+
+	if settings.size == 'partypet' then
+		name:SetPoint("LEFT", 2, 1)
+		name:SetPoint("RIGHT", -2, 0)
+		hpp:SetPoint("RIGHT", hp, -2, 1)
+
+		hp:SetHeight(14)
+
+		pp:Hide()
+		ppbg:Hide()
+		self.Power = nil
+
+	elseif settings.size == 'small' or settings.size == 'party' then
 		name:SetPoint("LEFT", 2, 1)
 		hpp:SetPoint("RIGHT", hp, -2, 1)
+
 		hp:SetHeight(10)
-
-		-- Power bar
-		local pp = CreateFrame"StatusBar"
-		pp:SetWidth(width - 16)
 		pp:SetHeight(4)
-		pp:SetStatusBarTexture(texture)
-
-		pp:SetParent(self)
 		pp:SetPoint("BOTTOM", 0, 8)
-		pp:SetPoint("LEFT", 8, 0)
-
-		pp.colorTapping = true
-		pp.colorDisconnected = true
-		pp.colorPower = true
-
-		self.Power = pp
-
-		-- Power bar background
-		local ppbg = pp:CreateTexture(nil, "BORDER")
-		ppbg:SetAllPoints(pp)
-		ppbg:SetTexture(texture)
-		ppbg.multiplier = .5
-		pp.bg = ppbg
 
 	else
-		-- Power bar
-		local pp = CreateFrame"StatusBar"
-		pp:SetWidth(width - 16)
+		hp:SetHeight(14)
 		pp:SetHeight(14)
-		pp:SetStatusBarTexture(texture)
-
-		pp:SetParent(self)
-		pp:SetPoint("LEFT", 8, 0)
-
-		pp.colorTapping = true
-		pp.colorDisconnected = true
 		pp.colorPower = true
 		pp.frequentUpdates = true
-
-		self.Power = pp
-
-		-- Power bar background
-		local ppbg = pp:CreateTexture(nil, "BORDER")
-		ppbg:SetAllPoints(pp)
-		ppbg:SetTexture(texture)
-		ppbg.multiplier = .5
-		pp.bg = ppbg
 
 		local ppp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 		ppp:SetPoint("RIGHT", pp, -2, 0)
@@ -260,7 +260,13 @@ local func = function(settings, self, unit)
 			auras:SetTextColor(1, 1, 1)
 			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
 
-		elseif settings.size ~= 'partypet' then
+		elseif settings.size == 'partypet' then
+			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+			auras:SetPoint("RIGHT", self, "LEFT")
+			auras:SetTextColor(1, 1, 1)
+			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom]")
+
+		else
 			-- Buffs
 			local buffs = CreateFrame("Frame", nil, self)
 			if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
@@ -367,7 +373,7 @@ oUF:RegisterStyle("Classic - Party", setmetatable({
 }, {__call = func}))
 
 oUF:RegisterStyle("Classic - PartyPet", setmetatable({
-	["initial-width"] = width,
+	["initial-width"] = width/2,
 	["initial-height"] = smallheight,
 	["size"] = 'partypet',
 }, {__call = func}))
@@ -412,7 +418,7 @@ party:Show()
 
 oUF:SetActiveStyle("Classic - PartyPet")
 
-local partypets = oUF:Spawn("header", "oUF_PartyPets", true)
+local partypets = oUF:Spawn("header", "oUF_PartyPets", "SecureGroupPetHeaderTemplate")
 partypets:SetPoint("TOPRIGHT", party, "TOPLEFT")
 partypets:SetManyAttributes(
 	"showParty", true,
