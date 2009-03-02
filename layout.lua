@@ -416,6 +416,17 @@ party:SetManyAttributes(
 party:Show()
 
 
+local tanks = oUF:Spawn("header", "oUF_Tanks")
+tanks:SetPoint("BOTTOM", party, "TOP", 0, 20)
+tanks:SetManyAttributes(
+	"showRaid", true,
+	"yOffset", 0, -- -smallheight,
+	"xOffset", -40,
+	"groupFilter", "MAINTANK"
+)
+tanks:Show()
+
+
 oUF:SetActiveStyle("Classic - PartyPet")
 
 local partypets = oUF:Spawn("header", "oUF_PartyPets", "SecureGroupPetHeaderTemplate")
@@ -426,6 +437,17 @@ partypets:SetManyAttributes(
 	"xOffset", -40
 )
 partypets:Show()
+
+
+local assists = oUF:Spawn("header", "oUF_Assists")
+assists:SetPoint("BOTTOMRIGHT", tanks, "BOTTOMLEFT")
+assists:SetManyAttributes(
+	"showRaid", true,
+	"yOffset", 0, -- -smallheight,
+	"xOffset", -40,
+	"groupFilter", "MAINASSIST"
+)
+assists:Show()
 
 
 ---------------------------
