@@ -42,7 +42,7 @@ oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) r
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
 
 oUF.TagEvents["[tekhp2]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
-oUF.Tags["[tekhp2]"] = function(u) if UnitHealth(u) < UnitHealthMax(u) then return "-"..oUF.Tags["[missinghp]"](u) end end
+oUF.Tags["[tekhp2]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) if c == 0 then return "Dead" elseif c < m then return "-"..oUF.Tags["[missinghp]"](u) end end
 
 oUF.TagEvents["[tekpet]"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
 oUF.Tags["[tekpet]"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return oUF.Tags["[name]"](u) end end
