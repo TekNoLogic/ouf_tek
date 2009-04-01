@@ -48,6 +48,7 @@ oUF.TagEvents["[tekpet]"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
 oUF.Tags["[tekpet]"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return oUF.Tags["[name]"](u) end end
 
 
+oUF.Tags["[tekgs]"]     = function(u) if UnitAura(u, "Guardian Spirit")        then return "|cffFFD800GS|r" end end
 oUF.Tags["[tekmd]"]     = function(u) if UnitAura(u, "Misdirection")           then return "|cff8E79FEMD|r" end end
 oUF.Tags["[tekss]"]     = function(u) if UnitAura(u, "Soulstone Resurrection") then return "|cffCA21FFSs|r" end end
 oUF.Tags["[tekinn]"]    = function(u) if UnitAura(u, "Innervate")              then return "|cff00FF33Inn|r" end end
@@ -258,7 +259,7 @@ local func = function(settings, self, unit)
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
-			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
+			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekgs( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
 
 		elseif settings.size == 'partypet' then
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
