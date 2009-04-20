@@ -48,6 +48,8 @@ oUF.TagEvents["[tekpet]"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
 oUF.Tags["[tekpet]"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return oUF.Tags["[name]"](u) end end
 
 
+oUF.Tags["[teksacs]"]   = function(u) if UnitAura(u, "Sacred Shield")          then return "|cffFFAA00SS|r" end end
+oUF.Tags["[tekbol]"]    = function(u) if UnitAura(u, "Beacon of Light")        then return "|cffFFD800BoL|r" end end
 oUF.Tags["[tekgs]"]     = function(u) if UnitAura(u, "Guardian Spirit")        then return "|cffFFD800GS|r" end end
 oUF.Tags["[tekmd]"]     = function(u) if UnitAura(u, "Misdirection")           then return "|cff8E79FEMD|r" end end
 oUF.Tags["[tekss]"]     = function(u) if UnitAura(u, "Soulstone Resurrection") then return "|cffCA21FFSs|r" end end
@@ -78,6 +80,8 @@ oUF.Tags["[tekmagic]"]   = function(u) return HasDebuffType(u, "Magic")   and "|
 oUF.Tags["[tekcurse]"]   = function(u) return HasDebuffType(u, "Curse")   and "|cff9900FFCu|r" or "" end
 oUF.Tags["[tekpoison]"]  = function(u) return HasDebuffType(u, "Poison")  and "|cff009900Po|r" or "" end
 
+oUF.TagEvents["[teksacs]"]   = "UNIT_AURA"
+oUF.TagEvents["[tekbol]"]    = "UNIT_AURA"
 oUF.TagEvents["[tekmd]"]     = "UNIT_AURA"
 oUF.TagEvents["[tekss]"]     = "UNIT_AURA"
 oUF.TagEvents["[tekinn]"]    = "UNIT_AURA"
@@ -260,7 +264,7 @@ local func = function(settings, self, unit)
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
-			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekgs( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
+			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekgs( )][tekbol( )][teksacs( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
 
 		elseif settings.size == 'partypet' then
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
