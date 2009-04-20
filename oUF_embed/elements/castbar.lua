@@ -59,7 +59,7 @@ local UNIT_SPELLCAST_START = function(self, event, unit, spell, spellrank)
 		sf:SetPoint'BOTTOM'
 	end
 
-	if(self.PostCastStart) then self:PostCastStart(event, unit, spell, spellrank, castid) end
+	if(self.PostCastStart) then self:PostCastStart(event, unit, name, rank, text, castid) end
 	castbar:Show()
 end
 
@@ -109,7 +109,7 @@ local UNIT_SPELLCAST_DELAYED = function(self, event, unit, spellname, spellrank)
 
 	castbar:SetValue(duration)
 
-	if(self.PostCastDelayed) then self:PostCastDelayed(event, unit, spellname, spellrank) end
+	if(self.PostCastDelayed) then self:PostCastDelayed(event, unit, name, rank, text) end
 end
 
 local UNIT_SPELLCAST_STOP = function(self, event, unit, spellname, spellrank, castid)
@@ -161,7 +161,7 @@ local UNIT_SPELLCAST_CHANNEL_START = function(self, event, unit, spellname, spel
 		sf:SetPoint'BOTTOM'
 	end
 
-	if(self.PostChannelStart) then self:PostChannelStart(event, unit, spellname, spellrank) end
+	if(self.PostChannelStart) then self:PostChannelStart(event, unit, name, rank, text) end
 	castbar:Show()
 end
 
@@ -169,6 +169,10 @@ local UNIT_SPELLCAST_CHANNEL_UPDATE = function(self, event, unit, spellname, spe
 	if(self.unit ~= unit) then return end
 
 	local name, rank, text, texture, startTime, endTime, oldStart = UnitChannelInfo(unit)
+	if(not name) then
+		return
+	end
+
 	local castbar = self.Castbar
 	local duration = (endTime / 1000) - GetTime()
 
@@ -179,19 +183,21 @@ local UNIT_SPELLCAST_CHANNEL_UPDATE = function(self, event, unit, spellname, spe
 	castbar:SetMinMaxValues(0, castbar.max)
 	castbar:SetValue(duration)
 
-	if(self.PostChannelUpdate) then self:PostChannelUpdate(event, unit, spellname, spellrank) end
+	if(self.PostChannelUpdate) then self:PostChannelUpdate(event, unit, name, rank, text) end
 end
 
 local UNIT_SPELLCAST_CHANNEL_STOP = function(self, event, unit, spellname, spellrank)
 	if(self.unit ~= unit) then return end
 
 	local castbar = self.Castbar
-	castbar.channeling = nil
+	if(castbar:IsShown()) then
+		castbar.channeling = nil
 
-	castbar:SetValue(castbar.max)
-	castbar:Hide()
+		castbar:SetValue(castbar.max)
+		castbar:Hide()
 
-	if(self.PostChannelStop) then self:PostChannelStop(event, unit, spellname, spellrank) end
+		if(self.PostChannelStop) then self:PostChannelStop(event, unit, spellname, spellrank) end
+	end
 end
 
 local onUpdate = function(self, elapsed)
@@ -283,20 +289,20 @@ end
 
 local Enable = function(object, unit)
 	local castbar = object.Castbar
-	if(unit and unit:match'%wtarget$') then return end
 
 	if(castbar) then
-		object:RegisterEvent("UNIT_SPELLCAST_START", UNIT_SPELLCAST_START)
-		object:RegisterEvent("UNIT_SPELLCAST_FAILED", UNIT_SPELLCAST_FAILED)
-		object:RegisterEvent("UNIT_SPELLCAST_STOP", UNIT_SPELLCAST_STOP)
-		object:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", UNIT_SPELLCAST_INTERRUPTED)
-		object:RegisterEvent("UNIT_SPELLCAST_DELAYED", UNIT_SPELLCAST_DELAYED)
-		object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", UNIT_SPELLCAST_CHANNEL_START)
-		object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", UNIT_SPELLCAST_CHANNEL_UPDATE)
-		object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", 'UNIT_SPELLCAST_INTERRUPTED')
-		object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", UNIT_SPELLCAST_CHANNEL_STOP)
+		if(not (unit and unit:match'%wtarget$')) then
+			object:RegisterEvent("UNIT_SPELLCAST_START", UNIT_SPELLCAST_START)
+			object:RegisterEvent("UNIT_SPELLCAST_FAILED", UNIT_SPELLCAST_FAILED)
+			object:RegisterEvent("UNIT_SPELLCAST_STOP", UNIT_SPELLCAST_STOP)
+			object:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", UNIT_SPELLCAST_INTERRUPTED)
+			object:RegisterEvent("UNIT_SPELLCAST_DELAYED", UNIT_SPELLCAST_DELAYED)
+			object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START", UNIT_SPELLCAST_CHANNEL_START)
+			object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", UNIT_SPELLCAST_CHANNEL_UPDATE)
+			object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", 'UNIT_SPELLCAST_INTERRUPTED')
+			object:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", UNIT_SPELLCAST_CHANNEL_STOP)
+		end
 
-		castbar.parent = object
 		castbar:SetScript("OnUpdate", object.OnCastbarUpdate or onUpdate)
 
 		if object.unit == "player" then
@@ -343,7 +349,6 @@ local Disable = function(object, unit)
 		object:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", UNIT_SPELLCAST_CHANNEL_INTERRUPTED)
 		object:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_STOP", UNIT_SPELLCAST_CHANNEL_STOP)
 
-		castbar.parent = nil
 		castbar:SetScript("OnUpdate", nil)
 	end
 end

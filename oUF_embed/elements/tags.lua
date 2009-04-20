@@ -79,29 +79,30 @@ tags = {
 	end,
 }
 local tagEvents = {
-	["[curhp]"]       = "UNIT_HEALTH",
-	["[curpp]"]       = "UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE",
-	["[dead]"]        = "UNIT_HEALTH",
-	["[leader]"]      = "PARTY_LEADER_CHANGED",
-	["[leaderlong]"]  = "PARTY_LEADER_CHANGED",
-	["[level]"]       = "UNIT_LEVEL PLAYER_LEVEL_UP",
-	["[maxhp]"]       = "UNIT_MAXHEALTH",
-	["[maxpp]"]       = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE",
-	["[missinghp]"]   = "UNIT_HEALTH UNIT_MAXHEALTH",
-	["[missingpp]"]   = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_MAXRUNIC_POWER UNIT_RUNIC_POWER",
-	["[name]"]        = "UNIT_NAME_UPDATE",
-	["[offline]"]     = "UNIT_HEALTH",
-	["[perhp]"]       = "UNIT_HEALTH UNIT_MAXHEALTH",
-	["[perpp]"]       = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_MAXRUNIC_POWER UNIT_RUNIC_POWER",
-	["[pvp]"]         = "UNIT_FACTION",
-	["[resting]"]     = "PLAYER_UPDATE_RESTING",
-	["[status]"]      = "UNIT_HEALTH PLAYER_UPDATE_RESTING",
-	["[smartlevel]"]  = "UNIT_LEVEL PLAYER_LEVEL_UP UNIT_CLASSIFICATION_CHANGED",
-	["[threat]"]      = "UNIT_THREAT_SITUATION_UPDATE",
-	["[threatcolor]"] = "UNIT_THREAT_SITUATION_UPDATE",
-	['[cpoints]']     = 'UNIT_COMBO_POINTS UNIT_TARGET',
-	["[classification]"]      = "UNIT_CLASSIFICATION_CHANGED",
-	["[shortclassification]"] = "UNIT_CLASSIFICATION_CHANGED",
+	["[curhp]"]               = "UNIT_HEALTH",
+	["[curpp]"]               = "UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER",
+	["[dead]"]                = "UNIT_HEALTH",
+	["[leader]"]              = "PARTY_LEADER_CHANGED",
+	["[leaderlong]"]          = "PARTY_LEADER_CHANGED",
+	["[level]"]               = "UNIT_LEVEL PLAYER_LEVEL_UP",
+	["[maxhp]"]               = "UNIT_MAXHEALTH",
+	["[maxpp]"]               = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER",
+	["[missinghp]"]           = "UNIT_HEALTH UNIT_MAXHEALTH",
+	["[missingpp]"]           = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_MAXRUNIC_POWER UNIT_RUNIC_POWER",
+	["[name]"]                = "UNIT_NAME_UPDATE",
+	["[offline]"]             = "UNIT_HEALTH",
+	["[perhp]"]               = "UNIT_HEALTH UNIT_MAXHEALTH",
+	["[perpp]"]               = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_MAXRUNIC_POWER UNIT_RUNIC_POWER",
+	["[pvp]"]                 = "UNIT_FACTION",
+	["[resting]"]             = "PLAYER_UPDATE_RESTING",
+	["[status]"]              = "UNIT_HEALTH PLAYER_UPDATE_RESTING",
+	["[smartlevel]"]          = "UNIT_LEVEL PLAYER_LEVEL_UP UNIT_CLASSIFICATION_CHANGED",
+	["[threat]"]              = "UNIT_THREAT_SITUATION_UPDATE",
+	["[threatcolor]"]         = "UNIT_THREAT_SITUATION_UPDATE",
+	['[cpoints]']             = 'UNIT_COMBO_POINTS UNIT_TARGET',
+	['[rare]']                = 'UNIT_CLASSIFICATION_CHANGED',
+	['[classification]']      = 'UNIT_CLASSIFICATION_CHANGED',
+	['[shortclassification]'] = 'UNIT_CLASSIFICATION_CHANGED',
 }
 
 local unitlessEvents = {
@@ -115,7 +116,7 @@ local frame = CreateFrame"Frame"
 frame:SetScript('OnEvent', function(self, event, unit)
 	local strings = events[event]
 	if(strings) then
-		for k, fontstring in ipairs(strings) do
+		for k, fontstring in next, strings do
 			if(not unitlessEvents[event] and fontstring.parent.unit == unit and fontstring:IsVisible()) then
 				fontstring:UpdateTag()
 			end
@@ -125,9 +126,10 @@ end)
 
 local eventlessUnits = {}
 local timer = .5
+local lowestTimer = .5
 local OnUpdate = function(self, elapsed)
-	if(timer >= .5) then
-		for k, fs in ipairs(eventlessUnits) do
+	if(timer >= lowestTimer) then
+		for k, fs in next, eventlessUnits do
 			if(fs.parent:IsShown() and UnitExists(fs.parent.unit)) then
 				fs:UpdateTag()
 			end
@@ -140,7 +142,7 @@ local OnUpdate = function(self, elapsed)
 end
 
 local OnShow = function(self)
-	for _, fs in ipairs(self.__tags) do
+	for _, fs in next, self.__tags do
 		fs:UpdateTag()
 	end
 end
@@ -167,7 +169,7 @@ end
 
 local UnregisterEvents = function(fontstr)
 	for events, data in pairs(events) do
-		for k, tagfsstr in ipairs(data) do
+		for k, tagfsstr in pairs(data) do
 			if(tagfsstr == fontstr) then
 				if(#data[k] == 1) then frame:UnregisterEvent(event) end
 				data[k] = nil
@@ -189,7 +191,7 @@ local Tag = function(self, fs, tagstr, frequent)
 	else
 		-- Since people ignore everything that's good practice - unregister the tag
 		-- if it already exists.
-		for _, tag in ipairs(self.__tags) do
+		for _, tag in pairs(self.__tags) do
 			if(fs == tag) then
 				-- We don't need to remove it from the __tags table as Untag handles
 				-- that for us.
@@ -264,7 +266,7 @@ local Tag = function(self, fs, tagstr, frequent)
 			local unit = self.parent.unit
 			local __unit = self.parent.__unit
 
-			for i, func in ipairs(args) do
+			for i, func in next, args do
 				tmp[i] = func(unit, __unit) or ''
 			end
 
@@ -276,7 +278,11 @@ local Tag = function(self, fs, tagstr, frequent)
 	fs.UpdateTag = func
 
 	local unit = self.unit
-	if((unit and unit:match'%w+target') or frequent) then
+	if((unit and unit:match'%w+target') or fs.frequentUpdates) then
+		if(type(fs.frequentUpdates) == 'number') then
+			lowestTimer = math.min(fs.frequentUpdates, lowestTimer)
+		end
+
 		table.insert(eventlessUnits, fs)
 
 		if(not frame:GetScript'OnUpdate') then
@@ -301,17 +307,19 @@ local Untag = function(self, fs)
 	if(not fs or self == oUF) then return end
 
 	UnregisterEvents(fs)
-	for k, fontstr in ipairs(eventlessUnits) do
+	for k, fontstr in next, eventlessUnits do
 		if(fs == fontstr) then
 			table.remove(eventlessUnits, k)
 		end
 	end
 
-	for k, fontstr in ipairs(self.__tags) do
+	for k, fontstr in next, self.__tags do
 		if(fontstr == fs) then
 			table.remove(self.__tags, k)
 		end
 	end
+
+	fs.UpdateTag = nil
 end
 
 oUF.Tags = tags

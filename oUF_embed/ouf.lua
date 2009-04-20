@@ -51,14 +51,18 @@ local colors = {
 
 -- We do this because people edit the vars directly, and changing the default
 -- globals makes SPICE FLOW!
-for eclass, color in pairs(RAID_CLASS_COLORS) do
+for eclass, color in next, RAID_CLASS_COLORS do
 	colors.class[eclass] = {color.r, color.g, color.b}
 end
 
-for power, color in pairs(PowerBarColor) do
+for power, color in next, PowerBarColor do
 	if(type(power) == 'string') then
 		colors.power[power] = {color.r, color.g, color.b}
 	end
+end
+
+for eclass, color in next, FACTION_BAR_COLORS do
+	colors.reaction[eclass] = {color.r, color.g, color.b}
 end
 
 -- add-on object
@@ -108,7 +112,7 @@ end
 
 -- Events
 local OnEvent = function(self, event, ...)
-	if(not self:IsShown() and not self.__unit) then return end
+	if(not self:IsShown() and not self.vehicleUnit) then return end
 	self[event](self, event, ...)
 end
 
@@ -120,7 +124,7 @@ local OnAttributeChanged = function(self, name, value)
 			return
 		else
 			if(self.hasChildren) then
-				for _, object in ipairs(objects) do
+				for _, object in next, objects do
 					local unit = SecureButton_GetModifiedUnit(object)
 					object.unit = conv[unit] or unit
 					object:PLAYER_ENTERING_WORLD()
@@ -253,11 +257,11 @@ local initObject = function(unit, style, ...)
 
 		object:RegisterEvent"PLAYER_ENTERING_WORLD"
 
-		for element in pairs(elements) do
+		for element in next, elements do
 			object:EnableElement(element, unit)
 		end
 
-		for _, func in ipairs(callback) do
+		for _, func in next, callback do
 			func(object)
 		end
 
@@ -356,7 +360,7 @@ function oUF:RegisterEvent(event, func)
 		if(func) then
 			self[event] = func
 		elseif(not self[event]) then
-			error("Handler for event [%s] does not exist.", event)
+			return error("Handler for event [%s] on unit [%s] does not exist.", event, self.unit or 'unknown')
 		end
 
 		RegisterEvent(self, event)
@@ -448,7 +452,7 @@ function oUF:PLAYER_ENTERING_WORLD(event)
 	local unit = self.unit
 	if(not UnitExists(unit)) then return end
 
-	for _, func in ipairs(self.__elements) do
+	for _, func in next, self.__elements do
 		func(self, event, unit)
 	end
 end

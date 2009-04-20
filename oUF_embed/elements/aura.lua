@@ -8,6 +8,7 @@
 	 - onlyShowPlayer: Only display icons casted by the player. (Default: nil)
 	 - growth-x: Growth direction, affected by initialAnchor. (Default: "UP")
 	 - growth-y: Growth direction, affected by initialAnchor. (Default: "RIGHT")
+	 - disableCooldown: Disable the Cooldown Spiral on the Aura Icons. (Default: nil)
 	 - filter: Expects a string with filter. See the UnitAura[1] documentation for
 		more information.
 
@@ -99,15 +100,32 @@ local createAuraIcon = function(self, icons, index, debuff)
 	return button
 end
 
+local customFilter = function(icons, unit, icon, name, rank, texture, count, dtype, duration, timeLeft, caster)
+	local isPlayer
+
+	if(caster == 'player' or caster == 'vehicle') then
+		isPlayer = true
+	end
+
+	if((icons.onlyShowPlayer and isPlayer) or (not icons.onlyShowPlayer and name)) then
+		icon.isPlayer = isPlayer
+		icon.owner = caster
+		return true
+	end
+end
+
 local updateIcon = function(self, unit, icons, index, offset, filter, isDebuff, max)
 	if(index == 0) then index = max end
-	local name, rank, texture, count, dtype, duration, timeLeft, isPlayer = UnitAura(unit, index, filter)
 
 	local icon = icons[index + offset]
-	if((icons.onlyShowPlayer and isPlayer) or (not icons.onlyShowPlayer and name)) then
-		if(not icon) then icon = (self.CreateAuraIcon and self:CreateAuraIcon(icons, index, isDebuff)) or createAuraIcon(self, icons, index, isDebuff) end
+	if(not icon) then
+		icon = (self.CreateAuraIcon or createAuraIcon) (self, icons, index, isDebuff)
+	end
 
-		if(duration and duration > 0) then
+	local name, rank, texture, count, dtype, duration, timeLeft, caster = UnitAura(unit, index, filter)
+	local show = (self.CustomAuraFilter or customFilter) (icons, unit, icon, name, rank, texture, count, dtype, duration, timeLeft, caster)
+	if(show) then
+		if(not icons.disableCooldown and duration and duration > 0) then
 			icon.cd:SetCooldown(timeLeft - duration, duration)
 			icon.cd:Show()
 		else
@@ -119,22 +137,25 @@ local updateIcon = function(self, unit, icons, index, offset, filter, isDebuff, 
 
 			icon.overlay:SetVertexColor(color.r, color.g, color.b)
 			icon.overlay:Show()
-			icon.count:SetText((count > 1 and count))
 		else
 			icon.overlay:Hide()
 		end
 
-		icon:Show()
-		icon:SetID(index)
-
-		icon.filter = filter
-		icon.debuff = isDebuff
 		icon.icon:SetTexture(texture)
 		icon.count:SetText((count > 1 and count))
 
-		if(self.PostUpdateAuraIcon) then self:PostUpdateAuraIcon(icons, unit, icon, index, offset, filter, isDebuff) end
+		icon.filter = filter
+		icon.debuff = isDebuff
+
+		icon:SetID(index)
+		icon:Show()
+
+		if(self.PostUpdateAuraIcon) then
+			self:PostUpdateAuraIcon(icons, unit, icon, index, offset, filter, isDebuff)
+		end
+
 		return true
-	elseif(icon) then
+	else
 		icon:Hide()
 	end
 end
@@ -190,12 +211,12 @@ local Update = function(self, event, unit)
 		local visibleBuffs, visibleDebuffs = 0, 0
 		for index = 1, max do
 			if(index > buffs) then
-				if(updateIcon(self, unit, auras, index % debuffs, buffs, auras.debuffFilter or auras.filter or 'HARMFUL', true, debuffs)) then
-					visibleBuffs = visibleBuffs + 1
+				if(updateIcon(self, unit, auras, index % debuffs, visibleBuffs, auras.debuffFilter or auras.filter or 'HARMFUL', true, debuffs)) then
+					visibleDebuffs = visibleDebuffs + 1
 				end
 			else
 				if(updateIcon(self, unit, auras, index, 0, auras.buffFilter or  auras.filter or 'HELPFUL')) then
-					visibleDebuffs = visibleDebuffs + 1
+					visibleBuffs = visibleBuffs + 1
 				end
 			end
 		end
