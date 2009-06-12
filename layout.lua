@@ -37,6 +37,9 @@ local backdrop = {
 --      Custom tags      --
 ---------------------------
 
+oUF.TagEvents["[tekpp]"] = "UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER"
+oUF.Tags["[tekpp]"] = function(u) local c, m = UnitPower(u), UnitPowerMax(u) return c >= m and m ~= 100 and oUF.Tags["[maxpp]"](u) or oUF.Tags["[perpp]"](u).."%" end
+
 oUF.TagEvents["[tekhp]"] = "UNIT_HEALTH UNIT_MAXHEALTH"
 oUF.Tags["[tekhp]"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return (c <= 1 or not UnitIsConnected(u)) and "" or c >= m and oUF.Tags["[maxhp]"](u)
 	or UnitCanAttack("player", u) and oUF.Tags["[perhp]"](u).."%" or "-"..oUF.Tags["[missinghp]"](u) end
@@ -212,7 +215,7 @@ local func = function(settings, self, unit)
 		ppp:SetPoint("RIGHT", pp, -2, 0)
 		ppp:SetTextColor(1, 1, 1)
 		ppp.frequentUpdates = self.unit == "player"
-		self:Tag(ppp, "[perpp]%")
+		self:Tag(ppp, "[tekpp]")
 
 		-- Info string
 		local info = pp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
