@@ -432,7 +432,7 @@ tanks:SetManyAttributes(
 	"showRaid", true,
 	"yOffset", 0, -- -smallheight,
 	"xOffset", -40,
-	"groupFilter", "MAINTANK"
+	"groupFilter", "MAINTANK,MAINASSIST"
 )
 tanks:Show()
 
@@ -449,15 +449,6 @@ partypets:SetManyAttributes(
 partypets:Show()
 
 
-local assists = oUF:Spawn("header", "oUF_Assists")
-assists:SetPoint("BOTTOMRIGHT", tanks, "BOTTOMLEFT")
-assists:SetManyAttributes(
-	"showRaid", true,
-	"yOffset", 0, -- -smallheight,
-	"xOffset", -40,
-	"groupFilter", "MAINASSIST"
-)
-assists:Show()
 
 
 ---------------------------
