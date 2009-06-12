@@ -437,6 +437,34 @@ tanks:SetManyAttributes(
 tanks:Show()
 
 
+local ptanks = oUF:Spawn("header", "oUF_Tanks")
+ptanks:SetPoint("BOTTOM", tanks, "TOP", 0, 0)
+ptanks:SetManyAttributes(
+	"showRaid", true,
+	"yOffset", 0, -- -smallheight,
+	"xOffset", -40,
+	"nameList", ""
+)
+ptanks:Show()
+
+
+local mytanks = {}
+SLASH_OUF_TEK_TANK1 = "/ptank"
+SlashCmdList.OUF_TEK_TANK = function(msg)
+	if InCombatLockdown() then return print("Cannot set personal tanks in combat!") end
+
+	local name = msg ~= "" and msg or UnitName("target")
+	local found
+	for i,n in pairs(mytanks) do
+		if n == name then
+			found = true
+			table.remove(mytanks, i)
+		end
+	end
+	if not found then table.insert(mytanks, name) end
+
+	ptanks:SetAttribute("nameList", table.concat(mytanks, ","))
+end
 
 
 oUF:SetActiveStyle("Classic - PartyPet")
