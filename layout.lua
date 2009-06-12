@@ -259,18 +259,19 @@ local func = function(settings, self, unit)
 		self.Castbar = cast
 	end
 
+	local auratags = "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekgs( )][tekbol( )][teksacs( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]"
 	if(unit ~= 'player') then
 		if settings.size == 'party' then
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("LEFT", self, "RIGHT")
 			auras:SetTextColor(1, 1, 1)
-			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekms( )][tekmd( )][tekgs( )][tekbol( )][teksacs( )][tekpws( )][tekws( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom( )][tekss( )][tekfw( )][tekinn( )][tekfood( )][tekdrink]")
+			self:Tag(auras, auratags)
 
 		elseif settings.size == 'partypet' then
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 			auras:SetPoint("RIGHT", self, "LEFT")
 			auras:SetTextColor(1, 1, 1)
-			self:Tag(auras, "[tekcurse( )][tekpoison( )][tekdisease( )][tekmagic( )][tekflour( )][teklb( )][tekregrow( )][tekrejuv( )][tekrenew( )][tekpom]")
+			self:Tag(auras, auratags)
 
 		else
 			-- Buffs
