@@ -437,18 +437,16 @@ tanks:SetManyAttributes(
 tanks:Show()
 
 
+
+
 oUF:SetActiveStyle("Classic - PartyPet")
 
-local partypets = oUF:Spawn("header", "oUF_PartyPets", "SecureGroupPetHeaderTemplate")
-partypets:SetPoint("TOPRIGHT", party, "TOPLEFT")
-partypets:SetManyAttributes(
-	"showParty", true,
-	"yOffset", 0, -- -smallheight,
-	"xOffset", -40
-)
-partypets:Show()
-
-
+local lastpet
+for i=1,4 do
+	local pet = oUF:Spawn("partypet"..i)
+	pet:SetPoint("TOPRIGHT", lastpet or party, lastpet and "BOTTOMRIGHT" or "TOPLEFT")
+	lastpet = pet
+end
 
 
 ---------------------------
