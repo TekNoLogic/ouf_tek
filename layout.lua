@@ -7,6 +7,7 @@ local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
 local smallheight, height, width = 31, 64, 170
 local UnitReactionColor = UnitReactionColor
 local gray = {r = .3, g = .3, b = .3}
+local focus_highlight = {r = 1, g = 0, b = 1}
 local oUF = tekoUFembed
 tekoUFembed = nil
 
@@ -22,9 +23,12 @@ local menu = function(self)
 end
 
 local PostUpdateHealth = function(self, event, unit, bar, min, max)
-	local color = not UnitIsDeadOrGhost(unit) and (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')] or gray
+	local color = self.istankframe and UnitExists("focus") and UnitIsUnit(unit, "focus") and focus_highlight or
+		not UnitIsDeadOrGhost(unit) and (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')]
+		or gray
 	self:SetBackdropBorderColor(color.r, color.g, color.b)
 end
+local function Update_Focus_Highlight(self, event, ...) PostUpdateHealth(self, event, self.unit) end
 
 local backdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,
@@ -112,6 +116,12 @@ oUF.TagEvents["[tekpoison]"]  = "UNIT_AURA"
 ------------------------------
 
 local func = function(settings, self, unit)
+	self.istankframe = self:GetParent():GetName() == "oUF_Tanks"
+	if self.istankframe then
+		self.PLAYER_FOCUS_CHANGED = Update_Focus_Highlight
+		self:RegisterEvent("PLAYER_FOCUS_CHANGED")
+	end
+
 	self.unit = unit
 	self.menu = menu
 
