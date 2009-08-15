@@ -17,6 +17,8 @@
 	<Script file='elements\tags.lua' />
 	<Script file='elements\vehicle.lua' />
 	<Script file='elements\masterlooter.lua' />
+	<Script file='elements\assistant.lua' />
+	<Script file='elements\runebar.lua' />
 
 	<!--
 		This template requires the layout to set the anchoring positions from the

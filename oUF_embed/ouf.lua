@@ -51,8 +51,25 @@ local colors = {
 
 -- We do this because people edit the vars directly, and changing the default
 -- globals makes SPICE FLOW!
-for eclass, color in next, RAID_CLASS_COLORS do
-	colors.class[eclass] = {color.r, color.g, color.b}
+if(IsAddOnLoaded'!ClassColors' and CUSTOM_CLASS_COLORS) then
+	local updateColors = function()
+		for eclass, color in next, CUSTOM_CLASS_COLORS do
+			colors.class[eclass] = {color.r, color.g, color.b}
+		end
+
+		if(oUF) then
+			for _, obj in next, oUF.objects do
+				obj:PLAYER_ENTERING_WORLD()
+			end
+		end
+	end
+
+	updateColors()
+	CUSTOM_CLASS_COLORS:RegisterCallback(updateColors)
+else
+	for eclass, color in next, RAID_CLASS_COLORS do
+		colors.class[eclass] = {color.r, color.g, color.b}
+	end
 end
 
 for power, color in next, PowerBarColor do
@@ -113,7 +130,7 @@ end
 -- Events
 local OnEvent = function(self, event, ...)
 	if(not self:IsShown() and not self.vehicleUnit) then return end
-	self[event](self, event, ...)
+	return self[event](self, event, ...)
 end
 
 local OnAttributeChanged = function(self, name, value)
@@ -242,16 +259,27 @@ local initObject = function(unit, style, ...)
 			if(unit) then object:SetScale(scale) end
 		end
 
-		if(suffix == 'target') then
-			enableTargetUpdate(object)
+		local parent = (i == 1) and object:GetParent()
+		local showPlayer
+		if(parent) then
+			showPlayer = parent:GetAttribute'showPlayer' or parent:GetAttribute'showSolo'
 		end
 
-		if(num > 1 and i == 1) then
-			object.hasChildren = true
+		if(num > 1) then
+			if(i == 1) then
+				object.hasChildren = true
+			else
+				object.isChild = true
+			end
+		end
+
+		if(suffix == 'target' and (i == 1 and not showPlayer)) then
+			enableTargetUpdate(object)
+		else
+			object:SetScript("OnEvent", OnEvent)
 		end
 
 		object:SetAttribute("*type1", "target")
-		object:SetScript("OnEvent", OnEvent)
 		object:SetScript("OnAttributeChanged", OnAttributeChanged)
 		object:SetScript("OnShow", object.PLAYER_ENTERING_WORLD)
 
@@ -274,7 +302,7 @@ local initObject = function(unit, style, ...)
 end
 
 local walkObject = function(object, unit)
-	local style = object:GetParent().style or styles[style]
+	local style = styles[object:GetParent().style] or styles[style]
 
 	initObject(unit, style, object, object:GetChildren())
 end
@@ -304,7 +332,6 @@ function oUF:Spawn(unit, name, template, disableBlizz)
 	argcheck(unit, 2, 'string')
 	if(not style) then return error("Unable to create frame. No styles have been registered.") end
 
-	local style = styles[style]
 	local object
 	if(unit == "header") then
 		if(not template) then
@@ -404,6 +431,8 @@ function oUF:AddElement(name, update, enable, disable)
 end
 
 function oUF:EnableElement(name, unit)
+	if(self == oUF) then return nil, 'Invalid oUF object.' end
+
 	argcheck(name, 2, 'string')
 	argcheck(unit, 3, 'string', 'nil')
 
@@ -416,6 +445,8 @@ function oUF:EnableElement(name, unit)
 end
 
 function oUF:DisableElement(name)
+	if(self == oUF) then return nil, 'Invalid oUF object.' end
+
 	argcheck(name, 2, 'string')
 	local element = elements[name]
 	if(not element) then return end
@@ -424,12 +455,20 @@ function oUF:DisableElement(name)
 		if(update == element.update) then
 			table.remove(self.__elements, k)
 			element.disable(self)
+
+			-- We need to run a new update cycle incase we knocked ourself out of sync.
+			-- The main reason we do this is to make sure the full update is completed
+			-- if an element for some reason removes itself _during_ the update
+			-- progress.
+			self:PLAYER_ENTERING_WORLD('DisableElement', name)
 			break
 		end
 	end
 end
 
 function oUF:UpdateElement(name)
+	if(self == oUF) then return nil, 'Invalid oUF object.' end
+
 	argcheck(name, 2, 'string')
 	local element = elements[name]
 	if(not element) then return end

@@ -70,7 +70,7 @@ local Update = function(self, event, unit)
 			(bar.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
 			local _, class = UnitClass(unit)
 			t = self.colors.class[class]
-		elseif(bar.colorReaction) then
+		elseif(bar.colorReaction and UnitReaction(unit, 'player')) then
 			t = self.colors.reaction[UnitReaction(unit, "player")]
 		elseif(bar.colorSmooth and max ~= 0) then
 			r, g, b = self.ColorGradient(min / max, unpack(bar.smoothGradient or self.colors.smooth))
@@ -123,7 +123,7 @@ end
 local Disable = function(self)
 	local health = self.Health
 	if(health) then
-		if(self:GetScript'OnUpdate') then
+		if(health:GetScript'OnUpdate') then
 			health:SetScript('OnUpdate', nil)
 		else
 			self:UnregisterEvent('UNIT_HEALTH', Update)
