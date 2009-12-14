@@ -7,20 +7,20 @@ local oUF = ns.oUF
 --      Cluster      --
 -----------------------
 
-oUF:SetActiveStyle"Classic"
+oUF:SetActiveStyle("Classic")
 
-local player = oUF:Spawn"player"
+local player = oUF:Spawn("player")
 player:SetPoint("BOTTOMRIGHT", WorldFrame, "BOTTOM", 0, 80)
 
-local target = oUF:Spawn"target"
+local target = oUF:Spawn("target")
 target:SetPoint("LEFT", player, "RIGHT")
 
-oUF:SetActiveStyle"Classic - Small"
+oUF:SetActiveStyle("Classic - Small")
 
-local pet = oUF:Spawn"pet"
+local pet = oUF:Spawn("pet")
 pet:SetPoint('BOTTOMRIGHT', player, 'TOPRIGHT')
 
-local focus = oUF:Spawn"focus"
+local focus = oUF:Spawn("focus")
 focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 
 
@@ -34,7 +34,7 @@ local party = oUF:Spawn("header", "oUF_Party")
 party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
 party:SetManyAttributes(
 	"showParty", true,
-	"yOffset", 0, -- -smallheight,
+	"yOffset", 0,
 	"xOffset", -40
 )
 party:Show()
@@ -44,7 +44,7 @@ local tanks = oUF:Spawn("header", "oUF_Tanks")
 tanks:SetPoint("BOTTOM", party, "TOP", 0, 20)
 tanks:SetManyAttributes(
 	"showRaid", true,
-	"yOffset", 0, -- -smallheight,
+	"yOffset", 0,
 	"xOffset", -40,
 	"groupFilter", "MAINTANK,MAINASSIST"
 )
@@ -55,7 +55,7 @@ local ptanks = oUF:Spawn("header", "oUF_Tanks")
 ptanks:SetPoint("BOTTOM", tanks, "TOP", 0, 0)
 ptanks:SetManyAttributes(
 	"showRaid", true,
-	"yOffset", 0, -- -smallheight,
+	"yOffset", 0,
 	"xOffset", -40,
 	"nameList", ""
 )
@@ -95,21 +95,12 @@ end
 --      Rune frames      --
 ---------------------------
 
-RuneButtonIndividual4:ClearAllPoints()
+for i=1,6 do _G["RuneButtonIndividual"..i]:ClearAllPoints() end
+
 RuneButtonIndividual4:SetPoint("RIGHT", player, "LEFT", -2, 0)
-
-RuneButtonIndividual2:ClearAllPoints()
 RuneButtonIndividual2:SetPoint("BOTTOM", RuneButtonIndividual4, "TOP", 0, 4)
-
-RuneButtonIndividual6:ClearAllPoints()
 RuneButtonIndividual6:SetPoint("TOP", RuneButtonIndividual4, "BOTTOM", 0, -4)
-
-RuneButtonIndividual5:ClearAllPoints()
 RuneButtonIndividual5:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
-
-RuneButtonIndividual3:ClearAllPoints()
 RuneButtonIndividual3:SetPoint("RIGHT", RuneButtonIndividual4, "LEFT", -4, 0)
-
-RuneButtonIndividual1:ClearAllPoints()
 RuneButtonIndividual1:SetPoint("RIGHT", RuneButtonIndividual2, "LEFT", -4, 0)
 
