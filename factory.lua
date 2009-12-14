@@ -4,8 +4,16 @@ local oUF = ns.oUF
 
 local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
 local smallheight, height, width = 31, 64, 170
-local UnitReactionColor = UnitReactionColor
-local UnitReactionColor = FACTION_BAR_COLORS
+local UnitReactionColor = {
+	{ r = 1.0, g = 0.0, b = 0.0 },
+	{ r = 1.0, g = 0.0, b = 0.0 },
+	{ r = 1.0, g = 0.5, b = 0.0 },
+	{ r = 1.0, g = 1.0, b = 0.0 },
+	{ r = 0.0, g = 1.0, b = 0.0 },
+	{ r = 0.0, g = 1.0, b = 0.0 },
+	{ r = 0.0, g = 1.0, b = 0.0 },
+	{ r = 0.0, g = 1.0, b = 0.0 },
+}
 local gray = {r = .3, g = .3, b = .3}
 local focus_highlight = {r = 1, g = 0, b = 1}
 
