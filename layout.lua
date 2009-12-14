@@ -1,15 +1,12 @@
---[[-------------------------------------------------------------------------
-  Trond A Ekseth grants anyone the right to use this work for any purpose,
-  without any conditions, unless such conditions are required by law.
----------------------------------------------------------------------------]]
+
+local myname, ns = ...
+local oUF = ns.oUF
 
 local texture = [[Interface\AddOns\oUF_tek\textures\statusbar]]
 local smallheight, height, width = 31, 64, 170
 local UnitReactionColor = UnitReactionColor
 local gray = {r = .3, g = .3, b = .3}
 local focus_highlight = {r = 1, g = 0, b = 1}
-local oUF = tekoUFembed
-tekoUFembed = nil
 
 local menu = function(self)
 	local unit = self.unit:sub(1, -2)
