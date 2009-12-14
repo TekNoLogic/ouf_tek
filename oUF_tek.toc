@@ -13,4 +13,5 @@
 wrathfix.lua
 oUF_embed\oUF.xml
 tags.lua
+factory.lua
 layout.lua
