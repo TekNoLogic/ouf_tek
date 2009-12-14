@@ -25,10 +25,8 @@
 	 will disable the above color settings.
 	 - :PostUpdateHealth(event, unit, bar, min, max)
 --]]
-local parent = debugstack():match[[\AddOns\(.-)\]]
-local global = GetAddOnMetadata(parent, 'X-oUF')
-assert(global, 'X-oUF needs to be defined in the parent add-on.')
-local oUF = _G[global]
+local parent, ns = ...
+local oUF = ns.oUF
 
 local OnHealthUpdate
 do
@@ -40,7 +38,7 @@ do
 		if(health ~= self.min) then
 			self.min = health
 
-			self:GetParent():UNIT_MAXHEALTH("OnHealthUpdate", self.unit)
+			return self:GetParent():UNIT_MAXHEALTH("OnHealthUpdate", self.unit)
 		end
 	end
 end
@@ -72,7 +70,7 @@ local Update = function(self, event, unit)
 			t = self.colors.class[class]
 		elseif(bar.colorReaction and UnitReaction(unit, 'player')) then
 			t = self.colors.reaction[UnitReaction(unit, "player")]
-		elseif(bar.colorSmooth and max ~= 0) then
+		elseif(bar.colorSmooth) then
 			r, g, b = self.ColorGradient(min / max, unpack(bar.smoothGradient or self.colors.smooth))
 		elseif(bar.colorHealth) then
 			t = self.colors.health
@@ -95,7 +93,9 @@ local Update = function(self, event, unit)
 		self:OverrideUpdateHealth(event, unit, bar, min, max)
 	end
 
-	if(self.PostUpdateHealth) then self:PostUpdateHealth(event, unit, bar, min, max) end
+	if(self.PostUpdateHealth) then
+		return self:PostUpdateHealth(event, unit, bar, min, max)
+	end
 end
 
 local Enable = function(self)

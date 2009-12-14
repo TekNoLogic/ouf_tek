@@ -44,10 +44,8 @@
 
 	[1] http://www.wowwiki.com/API_UnitAura
 --]]
-local parent = debugstack():match[[\AddOns\(.-)\]]
-local global = GetAddOnMetadata(parent, 'X-oUF')
-assert(global, 'X-oUF needs to be defined in the parent add-on.')
-local oUF = _G[global]
+local parent, ns = ...
+local oUF = ns.oUF
 
 local OnEnter = function(self)
 	if(not self:IsVisible()) then return end
@@ -194,7 +192,7 @@ local SetAuraPosition = function(self, icons, x)
 		local cols = math.floor(icons:GetWidth() / size + .5)
 		local rows = math.floor(icons:GetHeight() / size + .5)
 
-		for i = 1, x do
+		for i = 1, #icons do
 			local button = icons[i]
 			if(button and button:IsShown()) then
 				if(gap and button.debuff) then
@@ -213,6 +211,8 @@ local SetAuraPosition = function(self, icons, x)
 				button:SetPoint(anchor, icons, anchor, col * size * growthx, row * size * growthy)
 
 				col = col + 1
+			elseif(not button) then
+				break
 			end
 		end
 	end
@@ -303,7 +303,9 @@ local Update = function(self, event, unit)
 		self:SetAuraPosition(debuffs, max)
 	end
 
-	if(self.PostUpdateAura) then self:PostUpdateAura(event, unit) end
+	if(self.PostUpdateAura) then
+		return self:PostUpdateAura(event, unit)
+	end
 end
 
 local Enable = function(self)

@@ -13,10 +13,8 @@
 	 - :CustomTimeText(duration)
 
 --]]
-local parent = debugstack():match[[\AddOns\(.-)\]]
-local global = GetAddOnMetadata(parent, 'X-oUF')
-assert(global, 'X-oUF needs to be defined in the parent add-on.')
-local oUF = _G[global]
+local parent, ns = ...
+local oUF = ns.oUF
 
 local noop = function() end
 local UnitName = UnitName
@@ -28,7 +26,7 @@ local UNIT_SPELLCAST_START = function(self, event, unit, spell, spellrank)
 	if(self.unit ~= unit) then return end
 
 	local castbar = self.Castbar
-	local name, rank, text, texture, startTime, endTime, _, castid = UnitCastingInfo(unit)
+	local name, rank, text, texture, startTime, endTime, _, castid, interrupt = UnitCastingInfo(unit)
 	if(not name) then
 		castbar:Hide()
 		return
@@ -43,6 +41,7 @@ local UNIT_SPELLCAST_START = function(self, event, unit, spell, spellrank)
 	castbar.max = max
 	castbar.delay = 0
 	castbar.casting = true
+	castbar.interrupt = interrupt
 
 	castbar:SetMinMaxValues(0, max)
 	castbar:SetValue(0)
@@ -59,7 +58,7 @@ local UNIT_SPELLCAST_START = function(self, event, unit, spell, spellrank)
 		sf:SetPoint'BOTTOM'
 	end
 
-	if(self.PostCastStart) then self:PostCastStart(event, unit, name, rank, text, castid) end
+	if(self.PostCastStart) then self:PostCastStart(event, unit, name, rank, text, castid, interrupt) end
 	castbar:Show()
 end
 
@@ -72,10 +71,13 @@ local UNIT_SPELLCAST_FAILED = function(self, event, unit, spellname, spellrank, 
 	end
 
 	castbar.casting = nil
+	castbar.interrupt = nil
 	castbar:SetValue(0)
 	castbar:Hide()
 
-	if(self.PostCastFailed) then self:PostCastFailed(event, unit, spellname, spellrank, castid) end
+	if(self.PostCastFailed) then
+		return self:PostCastFailed(event, unit, spellname, spellrank, castid)
+	end
 end
 
 local UNIT_SPELLCAST_INTERRUPTED = function(self, event, unit, spellname, spellrank, castid)
@@ -91,7 +93,9 @@ local UNIT_SPELLCAST_INTERRUPTED = function(self, event, unit, spellname, spellr
 	castbar:SetValue(0)
 	castbar:Hide()
 
-	if(self.PostCastInterrupted) then self:PostCastInterrupted(event, unit, spellname, spellrank, castid) end
+	if(self.PostCastInterrupted) then
+		return self:PostCastInterrupted(event, unit, spellname, spellrank, castid)
+	end
 end
 
 local UNIT_SPELLCAST_DELAYED = function(self, event, unit, spellname, spellrank)
@@ -109,7 +113,9 @@ local UNIT_SPELLCAST_DELAYED = function(self, event, unit, spellname, spellrank)
 
 	castbar:SetValue(duration)
 
-	if(self.PostCastDelayed) then self:PostCastDelayed(event, unit, name, rank, text) end
+	if(self.PostCastDelayed) then
+		return self:PostCastDelayed(event, unit, name, rank, text)
+	end
 end
 
 local UNIT_SPELLCAST_STOP = function(self, event, unit, spellname, spellrank, castid)
@@ -121,17 +127,20 @@ local UNIT_SPELLCAST_STOP = function(self, event, unit, spellname, spellrank, ca
 	end
 
 	castbar.casting = nil
+	castbar.interrupt = nil
 	castbar:SetValue(0)
 	castbar:Hide()
 
-	if(self.PostCastStop) then self:PostCastStop(event, unit, spellname, spellrank, castid) end
+	if(self.PostCastStop) then
+		return self:PostCastStop(event, unit, spellname, spellrank, castid)
+	end
 end
 
 local UNIT_SPELLCAST_CHANNEL_START = function(self, event, unit, spellname, spellrank)
 	if(self.unit ~= unit) then return end
 
 	local castbar = self.Castbar
-	local name, rank, text, texture, startTime, endTime = UnitChannelInfo(unit)
+	local name, rank, text, texture, startTime, endTime, isTrade, interrupt = UnitChannelInfo(unit)
 	if(not name) then
 		return
 	end
@@ -145,6 +154,7 @@ local UNIT_SPELLCAST_CHANNEL_START = function(self, event, unit, spellname, spel
 	castbar.max = max
 	castbar.delay = 0
 	castbar.channeling = true
+	castbar.interrupt = interrupt
 
 	castbar:SetMinMaxValues(0, max)
 	castbar:SetValue(duration)
@@ -161,7 +171,7 @@ local UNIT_SPELLCAST_CHANNEL_START = function(self, event, unit, spellname, spel
 		sf:SetPoint'BOTTOM'
 	end
 
-	if(self.PostChannelStart) then self:PostChannelStart(event, unit, name, rank, text) end
+	if(self.PostChannelStart) then self:PostChannelStart(event, unit, name, rank, text, interrupt) end
 	castbar:Show()
 end
 
@@ -183,7 +193,9 @@ local UNIT_SPELLCAST_CHANNEL_UPDATE = function(self, event, unit, spellname, spe
 	castbar:SetMinMaxValues(0, castbar.max)
 	castbar:SetValue(duration)
 
-	if(self.PostChannelUpdate) then self:PostChannelUpdate(event, unit, name, rank, text) end
+	if(self.PostChannelUpdate) then
+		return self:PostChannelUpdate(event, unit, name, rank, text)
+	end
 end
 
 local UNIT_SPELLCAST_CHANNEL_STOP = function(self, event, unit, spellname, spellrank)
@@ -192,11 +204,14 @@ local UNIT_SPELLCAST_CHANNEL_STOP = function(self, event, unit, spellname, spell
 	local castbar = self.Castbar
 	if(castbar:IsShown()) then
 		castbar.channeling = nil
+		castbar.interrupt = nil
 
 		castbar:SetValue(castbar.max)
 		castbar:Hide()
 
-		if(self.PostChannelStop) then self:PostChannelStop(event, unit, spellname, spellrank) end
+		if(self.PostChannelStop) then
+			return self:PostChannelStop(event, unit, spellname, spellrank)
+		end
 	end
 end
 
@@ -366,5 +381,5 @@ end
 
 oUF:AddElement('Castbar', function(...)
 	UNIT_SPELLCAST_START(...)
-	UNIT_SPELLCAST_CHANNEL_START(...)
+	return UNIT_SPELLCAST_CHANNEL_START(...)
 end, Enable, Disable)

@@ -24,10 +24,8 @@
 	 will disable the above color settings.
 	 - :PostUpdatePower(event, unit, bar, min, max)
 --]]
-local parent = debugstack():match[[\AddOns\(.-)\]]
-local global = GetAddOnMetadata(parent, 'X-oUF')
-assert(global, 'X-oUF needs to be defined in the parent add-on.')
-local oUF = _G[global]
+local parent, ns = ...
+local oUF = ns.oUF
 
 local UnitManaMax = UnitManaMax
 local UnitPowerType = UnitPowerType
@@ -43,7 +41,7 @@ do
 		if(power ~= self.min) then
 			self.min = power
 
-			self:GetParent():UNIT_MAXMANA("OnPowerUpdate", self.unit)
+			return self:GetParent():UNIT_MAXMANA("OnPowerUpdate", self.unit)
 		end
 	end
 end
@@ -100,7 +98,9 @@ local Update = function(self, event, unit)
 		self:OverrideUpdatePower(event, unit, bar, min, max)
 	end
 
-	if(self.PostUpdatePower) then self:PostUpdatePower(event, unit, bar, min, max) end
+	if(self.PostUpdatePower) then
+		return self:PostUpdatePower(event, unit, bar, min, max)
+	end
 end
 
 local Enable = function(self, unit)
