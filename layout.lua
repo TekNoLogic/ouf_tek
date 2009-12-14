@@ -316,6 +316,12 @@ local func = function(settings, self, unit)
 	else
 	end
 
+	local role = self:CreateTexture(nil, "OVERLAY")
+	role:SetHeight(16)
+	role:SetWidth(16)
+	role:SetPoint("RIGHT", self, "TOPRIGHT", -10, -1)
+	self.LFDRole = role
+
 	local leader = self:CreateTexture(nil, "OVERLAY")
 	leader:SetHeight(16)
 	leader:SetWidth(16)
