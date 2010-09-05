@@ -104,3 +104,33 @@ RuneButtonIndividual5:SetPoint("RIGHT", RuneButtonIndividual6, "LEFT", -4, 0)
 RuneButtonIndividual3:SetPoint("RIGHT", RuneButtonIndividual4, "LEFT", -4, 0)
 RuneButtonIndividual1:SetPoint("RIGHT", RuneButtonIndividual2, "LEFT", -4, 0)
 
+
+---------------------------
+--      Eclipse bar      --
+---------------------------
+
+local f = CreateFrame("Frame", nil, UIParent)
+f:SetWidth(1) f:SetHeight(1)
+f:SetPoint("TOP", player, "BOTTOM", 0, -20)
+f.unit = "player"
+EclipseBarFrame:SetParent(f)
+EclipseBarFrame:ClearAllPoints()
+EclipseBarFrame:SetPoint("CENTER")
+
+
+-------------------------
+--      HOLY POWA      --
+-------------------------
+
+PaladinPowerBar:SetParent(player)
+PaladinPowerBar:ClearAllPoints()
+PaladinPowerBar:SetPoint("TOP", player, "BOTTOM", 0, 4)
+
+
+---------------------------------------------
+--      I think I sharded in my pants      --
+---------------------------------------------
+
+ShardBarFrame:SetParent(player)
+ShardBarFrame:ClearAllPoints()
+ShardBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
