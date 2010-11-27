@@ -1,22 +1,5 @@
 --[[ Runebar:
 	Authors: Zariel, Haste
-
-	Usage: expects self.Runes to be a frame, setup and positiononed by the layout
-	itself, it also requires self.Runes through 6 to be a statusbar again setup by
-	the user.
-
-	Options
-
-	Required:
-	.height: (int)          Height of the bar
-	.width: (int)           Width of each bar
-
-	Optional:
-	.spacing: (float)       Spacing between each bar
-	.anchor: (string)       Initial anchor to the parent rune frame
-	.growth: (string)       LEFT or RIGHT or UP or DOWN
-	.runeMap: (table)       Set custom order, only remapped runes are required.
-	                        Example: .runeMap = {[3] = 5, [4] = 6}
 ]]
 
 if select(2, UnitClass("player")) ~= "DEATHKNIGHT" then return end
@@ -54,12 +37,13 @@ local UpdateType = function(self, event, rune, alt)
 	end
 end
 
-local Update = function(self, event, rid, usable)
+local UpdateRune = function(self, event, rid)
 	local rune = self.Runes[rid]
 	if(rune) then
 		local start, duration, runeReady = GetRuneCooldown(rune:GetID())
 		if(runeReady) then
-			rune:SetValue(duration)
+			rune:SetMinMaxValues(0, 1)
+			rune:SetValue(1)
 			rune:SetScript("OnUpdate", nil)
 		else
 			rune.duration = GetTime() - start
@@ -70,9 +54,22 @@ local Update = function(self, event, rid, usable)
 	end
 end
 
+local Update = function(self, event)
+	for i=1, 6 do
+		UpdateRune(self, event, i)
+	end
+end
+
+local ForceUpdate = function(element)
+	return Update(element.__owner, 'ForceUpdate')
+end
+
 local Enable = function(self, unit)
 	local runes = self.Runes
 	if(runes and unit == 'player') then
+		runes.__owner = self
+		runes.ForceUpdate = ForceUpdate
+
 		for i=1, 6 do
 			local rune = runes[i]
 			rune:SetID(i)
@@ -85,60 +82,17 @@ local Enable = function(self, unit)
 			end
 		end
 
-		self:RegisterEvent("RUNE_POWER_UPDATE", Update)
+		self:RegisterEvent("RUNE_POWER_UPDATE", UpdateRune)
 		self:RegisterEvent("RUNE_TYPE_UPDATE", UpdateType)
 
 		runes:Show()
+
+		-- oUF leaves the vehicle events registered on the player frame, so
+		-- buffs and such are correctly updated when entering/exiting vehicles.
+		--
+		-- This however makes the code also show/hide the RuneFrame.
+		RuneFrame.Show = RuneFrame.Hide
 		RuneFrame:Hide()
-
-		-- さあ兄様、どうぞ姉様に
-		local runeMap = runes.runeMap
-		if(runeMap) then
-			for f, t in pairs(runeMap) do
-				runes[f], runes[t] = runes[t], runes[f]
-			end
-		else
-			runes[3], runes[5] = runes[5], runes[3]
-			runes[4], runes[6] = runes[6], runes[4]
-		end
-
-		-- XXX: Fix this for 1.4.
-		-- I really hate how this is done:
-		local width = runes.width
-		local height = runes.height
-		local spacing = runes.spacing or 0
-		local anchor = runes.anchor or "BOTTOMLEFT"
-		local growthX, growthY = 0, 0
-
-		if runes.growth == "LEFT" then
-			growthX = - 1
-		elseif runes.growth == "DOWN" then
-			growthY = - 1
-		elseif runes.growth == "UP" then
-			growthY = 1
-		else
-			growthX = 1
-		end
-
-		for i=1, 6 do
-			local bar = runes[i]
-			if(bar) then
-				bar:SetWidth(width)
-				bar:SetHeight(height)
-
-				bar:SetPoint(anchor, runes, anchor, (i - 1) * (width + spacing) * growthX, (i - 1) * (height + spacing) * growthY)
-			end
-		end
-
-		-- ええ、兄様。
-		if(runeMap) then
-			for f, t in pairs(runeMap) do
-				runes[f], runes[t] = runes[t], runes[f]
-			end
-		else
-			runes[3], runes[5] = runes[5], runes[3]
-			runes[4], runes[6] = runes[6], runes[4]
-		end
 
 		return true
 	end
@@ -146,9 +100,10 @@ end
 
 local Disable = function(self)
 	self.Runes:Hide()
+	RuneFrame.Show = nil
 	RuneFrame:Show()
 
-	self:UnregisterEvent("RUNE_POWER_UPDATE", Update)
+	self:UnregisterEvent("RUNE_POWER_UPDATE", UpdateRune)
 	self:UnregisterEvent("RUNE_TYPE_UPDATE", UpdateType)
 end
 
