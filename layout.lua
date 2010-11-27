@@ -28,67 +28,61 @@ focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 --      Party frames      --
 ----------------------------
 
-oUF:SetActiveStyle("Classic - Party")
-
-local party = oUF:Spawn("header", "oUF_Party")
-party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
-party:SetManyAttributes(
-	"showParty", true,
-	"yOffset", 0,
-	"xOffset", -40
-)
-party:Show()
-
-
-local tanks = oUF:Spawn("header", "oUF_Tanks")
-tanks:SetPoint("BOTTOM", party, "TOP", 0, 20)
-tanks:SetManyAttributes(
-	"showRaid", true,
-	"yOffset", 0,
-	"xOffset", -40,
-	"groupFilter", "MAINTANK,MAINASSIST"
-)
-tanks:Show()
-
-
-local ptanks = oUF:Spawn("header", "oUF_Tanks")
-ptanks:SetPoint("BOTTOM", tanks, "TOP", 0, 0)
-ptanks:SetManyAttributes(
-	"showRaid", true,
-	"yOffset", 0,
-	"xOffset", -40,
-	"nameList", ""
-)
-ptanks:Show()
-
-
-local mytanks = {}
-SLASH_OUF_TEK_TANK1 = "/ptank"
-SlashCmdList.OUF_TEK_TANK = function(msg)
-	if InCombatLockdown() then return print("Cannot set personal tanks in combat!") end
-
-	local name = msg ~= "" and msg or UnitName("target")
-	local found
-	for i,n in pairs(mytanks) do
-		if n == name then
-			found = true
-			table.remove(mytanks, i)
-		end
-	end
-	if not found then table.insert(mytanks, name) end
-
-	ptanks:SetAttribute("nameList", table.concat(mytanks, ","))
-end
-
-
-oUF:SetActiveStyle("Classic - PartyPet")
-
-local lastpet
-for i=1,4 do
-	local pet = oUF:Spawn("partypet"..i)
-	pet:SetPoint("TOPRIGHT", lastpet or party, lastpet and "BOTTOMRIGHT" or "TOPLEFT")
-	lastpet = pet
-end
+-- oUF:SetActiveStyle("Classic - Party")
+--
+-- local party = oUF:SpawnHeader("oUF_Party", nil, "raid,party")
+-- party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
+-- party:SetAttribute("showParty", true)
+-- party:SetAttribute("yOffset", 0)
+-- party:SetAttribute("xOffset", -40)
+-- party:Show()
+--
+--
+-- local tanks = oUF:Spawn("header", "oUF_Tanks")
+-- tanks:SetPoint("BOTTOM", party, "TOP", 0, 20)
+-- tanks:SetAttribute("showRaid", true)
+-- tanks:SetAttribute("yOffset", 0)
+-- tanks:SetAttribute("xOffset", -40)
+-- tanks:SetAttribute("groupFilter", "MAINTANK,MAINASSIST")
+-- tanks:Show()
+--
+--
+-- local ptanks = oUF:Spawn("header", "oUF_Tanks")
+-- ptanks:SetPoint("BOTTOM", tanks, "TOP", 0, 0)
+-- ptanks:SetAttribute("showRaid", true)
+-- ptanks:SetAttribute("yOffset", 0)
+-- ptanks:SetAttribute("xOffset", -40)
+-- ptanks:SetAttribute("nameList", "")
+-- ptanks:Show()
+--
+--
+-- local mytanks = {}
+-- SLASH_OUF_TEK_TANK1 = "/ptank"
+-- SlashCmdList.OUF_TEK_TANK = function(msg)
+-- 	if InCombatLockdown() then return print("Cannot set personal tanks in combat!") end
+--
+-- 	local name = msg ~= "" and msg or UnitName("target")
+-- 	local found
+-- 	for i,n in pairs(mytanks) do
+-- 		if n == name then
+-- 			found = true
+-- 			table.remove(mytanks, i)
+-- 		end
+-- 	end
+-- 	if not found then table.insert(mytanks, name) end
+--
+-- 	ptanks:SetAttribute("nameList", table.concat(mytanks, ","))
+-- end
+--
+--
+-- oUF:SetActiveStyle("Classic - PartyPet")
+--
+-- local lastpet
+-- for i=1,4 do
+-- 	local pet = oUF:Spawn("partypet"..i)
+-- 	pet:SetPoint("TOPRIGHT", lastpet or party, lastpet and "BOTTOMRIGHT" or "TOPLEFT")
+-- 	lastpet = pet
+-- end
 
 
 ---------------------------
