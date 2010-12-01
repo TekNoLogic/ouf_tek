@@ -28,16 +28,15 @@ focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 --      Party frames      --
 ----------------------------
 
--- oUF:SetActiveStyle("Classic - Party")
---
--- local party = oUF:SpawnHeader("oUF_Party", nil, "raid,party")
--- party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
--- party:SetAttribute("showParty", true)
--- party:SetAttribute("yOffset", 0)
--- party:SetAttribute("xOffset", -40)
--- party:Show()
---
---
+oUF:SetActiveStyle("Classic - Party")
+
+local party = oUF:SpawnHeader("oUF_Party", nil, "party,raid",
+	"showParty", true,
+	"yOffset", 0,
+	"xOffset", -40,
+	'oUF-initialConfigFunction', [[ self:SetWidth(170) self:SetHeight(31) ]])
+party:SetPoint("TOPLEFT", UIParent, "LEFT", 300, 0)
+
 -- local tanks = oUF:Spawn("header", "oUF_Tanks")
 -- tanks:SetPoint("BOTTOM", party, "TOP", 0, 20)
 -- tanks:SetAttribute("showRaid", true)
