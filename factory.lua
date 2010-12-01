@@ -83,7 +83,7 @@ local func = function(settings, self, unit, isSingle)
 	self:SetBackdropBorderColor(.3, .3, .3, 1)
 
 	-- Health bar
-	local hp = CreateFrame"StatusBar"
+	local hp = CreateFrame("StatusBar")
 	hp:SetStatusBarTexture(texture)
 
 	hp:SetParent(self)
@@ -106,6 +106,26 @@ local func = function(settings, self, unit, isSingle)
 	hpp:SetPoint("RIGHT", hp, -2, 0)
 	hpp:SetTextColor(1, 1, 1)
 	self:Tag(hpp, settings.size == 'partypet' and "[tekhp2]" or "[dead][offline][tekhp]")
+
+	-- My incoming heals
+	local myhpin = CreateFrame("StatusBar", nil, hp)
+	myhpin:SetWidth(width)
+	myhpin:SetStatusBarTexture(texture)
+	myhpin:SetStatusBarColor(0, 1, 0.5, 0.25)
+
+	myhpin:SetPoint("TOPLEFT", hp:GetStatusBarTexture(), "TOPRIGHT", 0, 0)
+	myhpin:SetPoint("BOTTOMLEFT", hp:GetStatusBarTexture(), "BOTTOMRIGHT", 0, 0)
+
+	-- Other player's incoming heals
+	local othhpin = CreateFrame("StatusBar", nil, hp)
+	othhpin:SetWidth(width)
+	othhpin:SetStatusBarTexture(texture)
+	othhpin:SetStatusBarColor(0, 1, 0.5, 0.25)
+
+	othhpin:SetPoint("TOPLEFT", myhpin:GetStatusBarTexture(), "TOPRIGHT", 0, 0)
+	othhpin:SetPoint("BOTTOMLEFT", myhpin:GetStatusBarTexture(), "BOTTOMRIGHT", 0, 0)
+
+	self.HealPrediction = {maxOverflow = 1.0, myBar = myhpin, otherBar = othhpin}
 
 	-- Health bar background
 	local hpbg = hp:CreateTexture(nil, "BORDER")
