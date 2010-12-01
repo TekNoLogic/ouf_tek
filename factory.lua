@@ -28,13 +28,14 @@ local menu = function(self)
 	end
 end
 
-local PostUpdateHealth = function(self, event, unit, bar, min, max)
+local PostUpdateHealth = function(self, unit, bar, min, max)
+	self = self.hpparent or self
 	local color = self.istankframe and UnitExists("focus") and UnitIsUnit(unit, "focus") and focus_highlight or
 		not UnitIsDeadOrGhost(unit) and (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')]
 		or gray
 	self:SetBackdropBorderColor(color.r, color.g, color.b)
 end
-local function Update_Focus_Highlight(self, event, ...) PostUpdateHealth(self, event, self.unit) end
+local function Update_Focus_Highlight(self, event, ...) PostUpdateHealth(self, self.unit) end
 
 local backdrop = {
 	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16,
@@ -98,7 +99,8 @@ local func = function(settings, self, unit, isSingle)
 	hp.frequentUpdates = true
 
 	self.Health = hp
-	self.PostUpdateHealth = PostUpdateHealth
+	hp.hpparent = self
+	hp.PostUpdate = PostUpdateHealth
 
 	local hpp = hp:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall") --"GameFontNormal")
 	hpp:SetPoint("RIGHT", hp, -2, 0)
