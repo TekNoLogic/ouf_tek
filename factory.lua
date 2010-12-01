@@ -181,7 +181,7 @@ local func = function(settings, self, unit, isSingle)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
 		info:SetTextColor(1, 1, 1)
-		self:Tag(info, "[difficulty][smartlevel]( )[rare] [raidcolor][smartclass]")
+		self:Tag(info, "[difficulty][smartlevel][ >rare] [raidcolor][smartclass]")
 
 		local cast = CreateFrame"StatusBar"
 		cast:SetWidth(width - 16 -14)
@@ -220,7 +220,7 @@ local func = function(settings, self, unit, isSingle)
 		self.Castbar = cast
 	end
 
-	local auratags = "[tekcurse]( )[tekpoison]( )[tekdisease]( )[tekmagic]( )[tekms]( )[tekmd]( )[tekgs]( )[tekbol]( )[teksacs]( )[tekpws]( )[tekws]( )[tekflour]( )[teklb]( )[tekregrow]( )[tekrejuv]( )[tekrenew]( )[tekpom]( )[tekss]( )[tekfw]( )[tekinn]( )[tekfood]( )[tekdrink]"
+	local auratags = "[tekcurse< ][tekpoison< ][tekdisease< ][tekmagic< ][tekms< ][tekmd< ][tekgs< ][tekbol< ][teksacs< ][tekpws< ][tekws< ][tekflour< ][teklb< ][tekregrow< ][tekrejuv< ][tekrenew< ][tekpom< ][tekss< ][tekfw< ][tekinn< ][tekfood< ][tekdrink]"
 	if(unit ~= 'player') then
 		if settings.size == 'party' then
 			local auras = self:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
