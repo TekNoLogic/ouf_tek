@@ -47,7 +47,7 @@ local backdrop = {
 --      Layout factory      --
 ------------------------------
 
-local func = function(settings, self, unit)
+local func = function(settings, self, unit, isSingle)
 	self.istankframe = self:GetParent():GetName() == "oUF_Tanks"
 	if self.istankframe then
 		self.PLAYER_FOCUS_CHANGED = Update_Focus_Highlight
@@ -56,6 +56,20 @@ local func = function(settings, self, unit)
 
 	self.unit = unit
 	self.menu = menu
+
+	if isSingle then
+		if settings.size == 'partypet' then
+			self:SetWidth(width/2)
+		else
+			self:SetWidth(width)
+		end
+
+		if settings.size == 'partypet' or settings.size == 'small' or settings.size == 'party' then
+			self:SetHeight(smallheight)
+		else
+			self:SetHeight(height)
+		end
+	end
 
 	self:SetScript("OnEnter", UnitFrame_OnEnter)
 	self:SetScript("OnLeave", UnitFrame_OnLeave)
