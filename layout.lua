@@ -117,7 +117,7 @@ EclipseBarFrame:SetPoint("CENTER")
 
 PaladinPowerBar:SetParent(player)
 PaladinPowerBar:ClearAllPoints()
-PaladinPowerBar:SetPoint("TOP", player, "BOTTOM", 0, 4)
+PaladinPowerBar:SetPoint("TOP", player, "BOTTOM", 0, 7)
 
 
 ---------------------------------------------
