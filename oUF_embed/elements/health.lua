@@ -1,10 +1,95 @@
+--[[ Element: Health Bar
+
+ Handles updating of `self.Health` based on the units health.
+
+ Widget
+
+ Health - A StatusBar used to represent current unit health.
+
+ Sub-Widgets
+
+ .bg - A Texture which functions as a background. It will inherit the color of
+       the main StatusBar.
+
+ Notes
+
+ The default StatusBar texture will be applied if the UI widget doesn't have a
+ status bar texture or color defined.
+
+ Options
+
+ The following options are listed by priority. The first check that returns
+ true decides the color of the bar.
+
+ .colorTapping      - Use `self.colors.tapping` to color the bar if the unit
+                      isn't tapped by the player.
+ .colorDisconnected - Use `self.colors.disconnected` to color the bar if the
+                      unit is offline.
+ .colorClass        - Use `self.colors.class[class]` to color the bar based on
+                      unit class. `class` is defined by the second return of
+                      [UnitClass](http://wowprogramming.com/docs/api/UnitClass).
+ .colorClassNPC     - Use `self.colors.class[class]` to color the bar if the
+                      unit is a NPC.
+ .colorClassPet     - Use `self.colors.class[class]` to color the bar if the
+                      unit is player controlled, but not a player.
+ .colorReaction     - Use `self.colors.reaction[reaction]` to color the bar
+                      based on the player's reaction towards the unit.
+                      `reaction` is defined by the return value of
+                      [UnitReaction](http://wowprogramming.com/docs/api/UnitReaction).
+ .colorSmooth       - Use `self.colors.smooth` to color the bar with a smooth
+                      gradient based on the player's current health percentage.
+ .colorHealth       - Use `self.colors.health` to color the bar. This flag is
+                      used to reset the bar color back to default if none of the
+                      above conditions are met.
+
+ Sub-Widgets Options
+
+ .multiplier - Defines a multiplier, which is used to tint the background based
+               on the main widgets R, G and B values. Defaults to 1 if not
+               present.
+
+ Examples
+
+   -- Position and size
+   local Health = CreateFrame("StatusBar", nil, self)
+   Health:SetHeight(20)
+   Health:SetPoint('TOP')
+   Health:SetPoint('LEFT')
+   Health:SetPoint('RIGHT')
+   
+   -- Add a background
+   local Background = Health:CreateTexture(nil, 'BACKGROUND')
+   Background:SetAllPoints(Health)
+   Background:SetTexture(1, 1, 1, .5)
+   
+   -- Options
+   Health.frequentUpdates = true
+   Health.colorTapping = true
+   Health.colorDisconnected = true
+   Health.colorClass = true
+   Health.colorReaction = true
+   Health.colorHealth = true
+   
+   -- Make the background darker.
+   Background.multiplier = .5
+   
+   -- Register it with oUF
+   self.Health = Health
+   self.Health.bg = Background
+
+ Hooks
+
+ Override(self) - Used to completely override the internal update function.
+                  Removing the table key entry will make the element fall-back
+                  to its internal function again.
+]]
 local parent, ns = ...
 local oUF = ns.oUF
 
 oUF.colors.health = {49/255, 207/255, 37/255}
 
-local Update = function(self, event, unit, powerType)
-	if(self.unit ~= unit or (event == 'UNIT_POWER' and powerType ~= 'HAPPINESS')) then return end
+local Update = function(self, event, unit)
+	if(self.unit ~= unit) then return end
 	local health = self.Health
 
 	if(health.PreUpdate) then health:PreUpdate(unit) end
@@ -26,8 +111,6 @@ local Update = function(self, event, unit, powerType)
 		t = self.colors.tapped
 	elseif(health.colorDisconnected and not UnitIsConnected(unit)) then
 		t = self.colors.disconnected
-	elseif(health.colorHappiness and UnitIsUnit(unit, "pet") and GetPetHappiness()) then
-		t = self.colors.happiness[GetPetHappiness()]
 	elseif(health.colorClass and UnitIsPlayer(unit)) or
 		(health.colorClassNPC and not UnitIsPlayer(unit)) or
 		(health.colorClassPet and UnitPlayerControlled(unit) and not UnitIsPlayer(unit)) then
@@ -36,7 +119,7 @@ local Update = function(self, event, unit, powerType)
 	elseif(health.colorReaction and UnitReaction(unit, 'player')) then
 		t = self.colors.reaction[UnitReaction(unit, "player")]
 	elseif(health.colorSmooth) then
-		r, g, b = self.ColorGradient(min / max, unpack(health.smoothGradient or self.colors.smooth))
+		r, g, b = self.ColorGradient(min, max, unpack(health.smoothGradient or self.colors.smooth))
 	elseif(health.colorHealth) then
 		t = self.colors.health
 	end
@@ -67,47 +150,25 @@ local ForceUpdate = function(element)
 	return Path(element.__owner, 'ForceUpdate', element.__owner.unit)
 end
 
-local OnHealthUpdate
-do
-	local UnitHealth = UnitHealth
-	OnHealthUpdate = function(self)
-		if(self.disconnected) then return end
-		local unit = self.__owner.unit
-		local health = UnitHealth(unit)
-
-		if(health ~= self.min) then
-			self.min = health
-
-			return Path(self.__owner, "OnHealthUpdate", unit)
-		end
-	end
-end
-
 local Enable = function(self, unit)
 	local health = self.Health
 	if(health) then
 		health.__owner = self
 		health.ForceUpdate = ForceUpdate
 
-		if(health.frequentUpdates and (unit and not unit:match'%w+target$')) then
-			health:SetScript('OnUpdate', OnHealthUpdate)
-
-			-- The party frames need this to handle disconnect states correctly.
-			if(unit == 'party') then
-				self:RegisterEvent("UNIT_HEALTH", Path)
-			end
+		if(health.frequentUpdates) then
+			self:RegisterEvent('UNIT_HEALTH_FREQUENT', Path)
 		else
-			self:RegisterEvent("UNIT_HEALTH", Path)
+			self:RegisterEvent('UNIT_HEALTH', Path)
 		end
 
 		self:RegisterEvent("UNIT_MAXHEALTH", Path)
 		self:RegisterEvent('UNIT_CONNECTION', Path)
-		self:RegisterEvent('UNIT_POWER', Path)
 
 		-- For tapping.
 		self:RegisterEvent('UNIT_FACTION', Path)
 
-		if(not health:GetStatusBarTexture()) then
+		if(health:IsObjectType'StatusBar' and not health:GetStatusBarTexture()) then
 			health:SetStatusBarTexture[[Interface\TargetingFrame\UI-StatusBar]]
 		end
 
@@ -118,14 +179,10 @@ end
 local Disable = function(self)
 	local health = self.Health
 	if(health) then
-		if(health:GetScript'OnUpdate') then
-			health:SetScript('OnUpdate', nil)
-		end
-
+		self:UnregisterEvent('UNIT_HEALTH_FREQUENT', Path)
 		self:UnregisterEvent('UNIT_HEALTH', Path)
 		self:UnregisterEvent('UNIT_MAXHEALTH', Path)
 		self:UnregisterEvent('UNIT_CONNECTION', Path)
-		self:UnregisterEvent('UNIT_POWER', Path)
 
 		self:UnregisterEvent('UNIT_FACTION', Path)
 	end
