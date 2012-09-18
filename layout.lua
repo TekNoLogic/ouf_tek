@@ -120,6 +120,15 @@ PaladinPowerBar:ClearAllPoints()
 PaladinPowerBar:SetPoint("TOP", player, "BOTTOM", 0, 7)
 
 
+--------------------------
+--      Holy balls      --
+--------------------------
+
+PriestBarFrame:SetParent(player)
+PriestBarFrame:ClearAllPoints()
+PriestBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 4)
+
+
 ---------------------------------------------
 --      I think I sharded in my pants      --
 ---------------------------------------------
