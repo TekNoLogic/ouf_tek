@@ -129,6 +129,15 @@ PriestBarFrame:ClearAllPoints()
 PriestBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 4)
 
 
+---------------------------
+--      Monky balls      --
+---------------------------
+
+MonkHarmonyBar:SetParent(player)
+MonkHarmonyBar:ClearAllPoints()
+MonkHarmonyBar:SetPoint("TOP", player, "BOTTOM", 0, 18)
+
+
 ---------------------------------------------
 --      I think I sharded in my pants      --
 ---------------------------------------------
