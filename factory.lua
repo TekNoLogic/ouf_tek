@@ -338,8 +338,13 @@ local func = function(settings, self, unit, isSingle)
 		combat:SetTexture([[Interface\CharacterFrame\UI-StateIcon]])
 		combat:SetTexCoord(1/2, 1, 0.01, 0.5)
 		self.Combat = combat
-
 	end
+
+	local phase = self:CreateTexture(nil, "ARTWORK")
+	phase:SetSize(25, 25)
+	phase:SetPoint("RIGHT", self, "LEFT")
+	phase:SetAlpha(0.6)
+	self.Phase = phase
 
 	-- Range fading on party
 	if(not unit) then

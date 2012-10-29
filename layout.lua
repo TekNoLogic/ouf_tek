@@ -145,3 +145,71 @@ MonkHarmonyBar:SetPoint("TOP", player, "BOTTOM", 0, 18)
 ShardBarFrame:SetParent(player)
 ShardBarFrame:ClearAllPoints()
 ShardBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
+
+
+--------------------------
+--      Phase icon      --
+--------------------------
+
+local parent, ns = ...
+local oUF = ns.oUF
+
+local function Update(self, event, arg1)
+	local Phase = self.Phase
+	local unit = self.unit
+
+	if event == 'UNIT_OTHER_PARTY_CHANGED' and arg1 ~= unit then return end
+
+	local inOtherGroup, canInteract = UnitInOtherParty(unit)
+	if not canInteract then
+		if Phase:IsObjectType("Texture") then
+			Phase:SetTexture("Interface\\PlayerFrame\\whisper-only")
+			Phase:SetTexCoord(0.1875, 0.8125, 0.1875, 0.8125)
+		end
+		Phase.tooltip = PARTY_IN_PUBLIC_GROUP_MESSAGE
+		Phase:Show()
+	elseif not UnitInPhase(unit) and UnitExists(unit) then
+		if Phase:IsObjectType("Texture") then
+			Phase:SetTexture("Interface\\TargetingFrame\\UI-PhasingIcon")
+			Phase:SetTexCoord(0.15625, 0.84375, 0.15625, 0.84375)
+		end
+		Phase.tooltip = PARTY_PHASED_MESSAGE
+		Phase:Show()
+	else
+		Phase:Hide()
+	end
+end
+
+local function ForceUpdate(element)
+	return Update(element.__owner, 'ForceUpdate')
+end
+
+local function Enable(self)
+	local Phase = self.Phase
+	if Phase then
+		self:RegisterEvent("PLAYER_ENTERING_WORLD", Update, true)
+		self:RegisterEvent("GROUP_ROSTER_UPDATE", Update, true)
+		self:RegisterEvent("UNIT_PHASE", Update, true)
+		self:RegisterEvent("PARTY_MEMBER_ENABLE", Update, true)
+		self:RegisterEvent("PARTY_MEMBER_DISABLE", Update, true)
+		self:RegisterEvent("UNIT_OTHER_PARTY_CHANGED", Update, true)
+
+		Phase.__owner = self
+
+		return true
+	end
+end
+
+local function Disable(self)
+	local Phase = self.Phase
+	if Phase then
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD", Update)
+		self:UnregisterEvent("GROUP_ROSTER_UPDATE", Update)
+		self:UnregisterEvent("UNIT_PHASE", Update)
+		self:UnregisterEvent("PARTY_MEMBER_ENABLE", Update)
+		self:UnregisterEvent("PARTY_MEMBER_DISABLE", Update)
+		self:UnregisterEvent("UNIT_OTHER_PARTY_CHANGED", Update)
+	end
+end
+
+oUF:AddElement('Phase', Update, Enable, Disable)
