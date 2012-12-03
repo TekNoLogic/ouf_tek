@@ -264,7 +264,11 @@ local func = function(settings, self, unit, isSingle)
 		else
 			-- Buffs
 			local buffs = CreateFrame("Frame", nil, self)
-			if settings.size == 'small' then buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT") else buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT") end
+			if settings.size == 'small' then
+				buffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT")
+			else
+				buffs:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
+			end
 			buffs:SetHeight(16)
 			buffs:SetWidth(width/2)
 
