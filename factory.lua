@@ -237,6 +237,13 @@ local func = function(settings, self, unit, isSingle)
 		casticon:SetWidth(14) casticon:SetHeight(14)
 		cast.Icon = casticon
 
+		local shield = cast:CreateTexture(nil, "BORDER")
+		shield:SetDrawLayer("BORDER", -1)
+		shield:SetPoint("CENTER", casticon)
+		shield:SetSize(26, 26)
+		shield:SetTexture("Interface\\Buttons\\UI-Button-Outline")
+		cast.Shield = shield
+
 		self.Castbar = cast
 	end
 
