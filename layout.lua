@@ -15,6 +15,19 @@ player:SetPoint("BOTTOMRIGHT", WorldFrame, "BOTTOM", 0, 80)
 local target = oUF:Spawn("target")
 target:SetPoint("LEFT", player, "RIGHT")
 
+local boss1 = oUF:Spawn("boss1")
+boss1:SetPoint("TOPRIGHT", WorldFrame, "TOP", 0, -30)
+
+local boss2 = oUF:Spawn("boss2")
+boss2:SetPoint("LEFT", boss1, "RIGHT")
+
+local boss3 = oUF:Spawn("boss3")
+boss3:SetPoint("LEFT", boss2, "RIGHT")
+
+local boss4 = oUF:Spawn("boss4")
+boss4:SetPoint("RIGHT", boss1, "LEFT")
+
+
 oUF:SetActiveStyle("Classic - Small")
 
 local pet = oUF:Spawn("pet")
