@@ -140,7 +140,7 @@ local func = function(settings, self, unit, isSingle)
 	name:SetPoint("RIGHT", hpp, "LEFT", -2, 0)
 	name:SetJustifyH"LEFT"
 	name:SetTextColor(1, 1, 1)
-	self:Tag(name, settings.size == 'partypet' and "[tekpet]" or "[name][leader]")
+	self:Tag(name, settings.size == 'partypet' and "[tekpet]" or "[name][ >leader]")
 
 	-- Power bar
 	local pp = CreateFrame"StatusBar"
