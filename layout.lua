@@ -167,30 +167,28 @@ ShardBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
 local parent, ns = ...
 local oUF = ns.oUF
 
+local unitevents = {UNIT_OTHER_PARTY_CHANGED = true, UNIT_PHASE = true}
+
 local function Update(self, event, arg1)
 	local Phase = self.Phase
 	local unit = self.unit
 
-	if event == 'UNIT_OTHER_PARTY_CHANGED' and arg1 ~= unit then return end
+	if unitevents[event] and arg1 ~= unit then return end
 
-	local inOtherGroup, canInteract = UnitInOtherParty(unit)
-	if not canInteract then
-		if Phase:IsObjectType("Texture") then
-			Phase:SetTexture("Interface\\PlayerFrame\\whisper-only")
-			Phase:SetTexCoord(0.1875, 0.8125, 0.1875, 0.8125)
-		end
+	if UnitInOtherParty(unit) then
+		Phase:SetTexture("Interface\\LFGFrame\\LFG-Eye")
+		Phase:SetTexCoord(0.125, 0.25, 0.25, 0.5)
 		Phase.tooltip = PARTY_IN_PUBLIC_GROUP_MESSAGE
 		Phase:Show()
 	elseif not UnitInPhase(unit) and UnitExists(unit) then
-		if Phase:IsObjectType("Texture") then
-			Phase:SetTexture("Interface\\TargetingFrame\\UI-PhasingIcon")
-			Phase:SetTexCoord(0.15625, 0.84375, 0.15625, 0.84375)
-		end
+		Phase:SetTexture("Interface\\TargetingFrame\\UI-PhasingIcon")
+		Phase:SetTexCoord(0.15625, 0.84375, 0.15625, 0.84375)
 		Phase.tooltip = PARTY_PHASED_MESSAGE
 		Phase:Show()
 	else
 		Phase:Hide()
 	end
+
 end
 
 local function ForceUpdate(element)
