@@ -216,6 +216,8 @@ local tagStrings = {
 			return 'Elite'
 		elseif(c == 'worldboss') then
 			return 'Boss'
+		elseif(c == 'minus') then
+			return 'Affix'
 		end
 	end]],
 
@@ -229,6 +231,8 @@ local tagStrings = {
 			return '+'
 		elseif(c == 'worldboss') then
 			return 'B'
+		elseif(c == 'minus') then
+			return '-'
 		end
 	end]],
 
@@ -299,6 +303,13 @@ local tagStrings = {
 			return num
 		end
 	end]],
+
+	['affix'] = [[function(u)
+		local c = UnitClassification(u)
+		if(c == 'minus') then
+			return 'Affix'
+		end
+	end]],
 }
 
 local tags = setmetatable(
@@ -366,7 +377,7 @@ local tagEvents = {
 	['rare']                = 'UNIT_CLASSIFICATION_CHANGED',
 	['classification']      = 'UNIT_CLASSIFICATION_CHANGED',
 	['shortclassification'] = 'UNIT_CLASSIFICATION_CHANGED',
-	["group"]               = "RAID_ROSTER_UPDATE",
+	["group"]               = "GROUP_ROSTER_UPDATE",
 	["curpp"]               = 'UNIT_POWER',
 	["maxpp"]               = 'UNIT_MAXPOWER',
 	["missingpp"]           = 'UNIT_MAXPOWER UNIT_POWER',
@@ -389,7 +400,7 @@ local unitlessEvents = {
 
 	PARTY_LEADER_CHANGED = true,
 
-	RAID_ROSTER_UPDATE = true,
+	GROUP_ROSTER_UPDATE = true,
 
 	UNIT_COMBO_POINTS = true
 }
