@@ -159,6 +159,10 @@ ShardBarFrame:SetParent(player)
 ShardBarFrame:ClearAllPoints()
 ShardBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
 
+BurningEmbersBarFrame:SetParent(player)
+BurningEmbersBarFrame:ClearAllPoints()
+BurningEmbersBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
+
 
 --------------------------
 --      Phase icon      --
