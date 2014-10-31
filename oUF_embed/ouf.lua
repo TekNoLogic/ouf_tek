@@ -213,21 +213,21 @@ local initObject = function(unit, style, styleFunc, header, ...)
 		end
 
 		if(not (suffix == 'target' or objectUnit and objectUnit:match'target')) then
-			object:RegisterEvent('UNIT_ENTERED_VEHICLE', updateActiveUnit)
-			object:RegisterEvent('UNIT_EXITED_VEHICLE', updateActiveUnit)
+			object:RegisterEvent('UNIT_ENTERED_VEHICLE', updateActiveUnit, true)
+			object:RegisterEvent('UNIT_EXITED_VEHICLE', updateActiveUnit, true)
 
 			-- We don't need to register UNIT_PET for the player unit. We register it
 			-- mainly because UNIT_EXITED_VEHICLE and UNIT_ENTERED_VEHICLE doesn't always
 			-- have pet information when they fire for party and raid units.
 			if(objectUnit ~= 'player') then
-				object:RegisterEvent('UNIT_PET', UpdatePet)
+				object:RegisterEvent('UNIT_PET', UpdatePet, true)
 			end
 		end
 
 		if(not header) then
 			-- No header means it's a frame created through :Spawn().
 			object:SetAttribute("*type1", "target")
-			object:SetAttribute('*type2', 'menu')
+			object:SetAttribute('*type2', 'togglemenu')
 
 			-- No need to enable this for *target frames.
 			if(not (unit:match'target' or suffix == 'target')) then
@@ -473,7 +473,7 @@ do
 				end
 
 				frame:SetAttribute('*type1', 'target')
-				frame:SetAttribute('*type2', 'menu')
+				frame:SetAttribute('*type2', 'togglemenu')
 				frame:SetAttribute('toggleForVehicle', true)
 				frame:SetAttribute('oUF-guessUnit', unit)
 			end

@@ -52,6 +52,10 @@ local tagStrings = {
 
 	["level"] = [[function(u)
 		local l = UnitLevel(u)
+		if(UnitIsWildBattlePet(u) or UnitIsBattlePetCompanion(u)) then
+			l = UnitBattlePetLevel(u)
+		end
+
 		if(l > 0) then
 			return l
 		else
@@ -210,7 +214,7 @@ local tagStrings = {
 		local c = UnitClassification(u)
 		if(c == 'rare') then
 			return 'Rare'
-		elseif(c == 'eliterare') then
+		elseif(c == 'rareelite') then
 			return 'Rare Elite'
 		elseif(c == 'elite') then
 			return 'Elite'
@@ -225,7 +229,7 @@ local tagStrings = {
 		local c = UnitClassification(u)
 		if(c == 'rare') then
 			return 'R'
-		elseif(c == 'eliterare') then
+		elseif(c == 'rareelite') then
 			return 'R+'
 		elseif(c == 'elite') then
 			return '+'
@@ -277,30 +281,36 @@ local tagStrings = {
 	end]],
 
 	['soulshards'] = [[function()
-		local num = UnitPower('player', SPELL_POWER_SOUL_SHARDS)
-		if(num > 0) then
-			return num
+		if(IsPlayerSpell(WARLOCK_SOULBURN)) then
+			local num = UnitPower('player', SPELL_POWER_SOUL_SHARDS)
+			if(num > 0) then
+				return num
+			end
 		end
 	end]],
 
 	['holypower'] = [[function()
-		local num = UnitPower('player', SPELL_POWER_HOLY_POWER)
-		if(num > 0) then
-			return num
+		if(IsPlayerSpell(85673)) then
+			local num = UnitPower('player', SPELL_POWER_HOLY_POWER)
+			if(num > 0) then
+				return num
+			end
 		end
 	end]],
 
 	['chi'] = [[function()
-		local num = UnitPower('player', SPELL_POWER_LIGHT_FORCE)
+		local num = UnitPower('player', SPELL_POWER_CHI)
 		if(num > 0) then
 			return num
 		end
 	end]],
 
 	['shadoworbs'] = [[function()
-		local num = UnitPower('player', SPELL_POWER_SHADOW_ORBS)
-		if(num > 0) then
-			return num
+		if(IsPlayerSpell(95740)) then
+			local num = UnitPower('player', SPELL_POWER_SHADOW_ORBS)
+			if(num > 0) then
+				return num
+			end
 		end
 	end]],
 
@@ -374,6 +384,8 @@ local tagEvents = {
 	["threat"]              = "UNIT_THREAT_SITUATION_UPDATE",
 	["threatcolor"]         = "UNIT_THREAT_SITUATION_UPDATE",
 	['cpoints']             = 'UNIT_COMBO_POINTS PLAYER_TARGET_CHANGED',
+	['affix']				= 'UNIT_CLASSIFICATION_CHANGED',
+	['plus']				= 'UNIT_CLASSIFICATION_CHANGED',
 	['rare']                = 'UNIT_CLASSIFICATION_CHANGED',
 	['classification']      = 'UNIT_CLASSIFICATION_CHANGED',
 	['shortclassification'] = 'UNIT_CLASSIFICATION_CHANGED',
@@ -387,10 +399,10 @@ local tagEvents = {
 	["pereclipse"]          = 'UNIT_POWER',
 	['curmana']             = 'UNIT_POWER UNIT_MAXPOWER',
 	['maxmana']             = 'UNIT_POWER UNIT_MAXPOWER',
-	['soulshards']          = 'UNIT_POWER',
-	['holypower']           = 'UNIT_POWER',
+	['soulshards']          = 'UNIT_POWER SPELLS_CHANGED',
+	['holypower']           = 'UNIT_POWER SPELLS_CHANGED',
 	['chi']                 = 'UNIT_POWER',
-	['shadoworbs']          = 'UNIT_POWER',
+	['shadoworbs']          = 'UNIT_POWER SPELLS_CHANGED',
 }
 
 local unitlessEvents = {
