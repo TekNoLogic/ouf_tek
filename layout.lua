@@ -155,13 +155,9 @@ MonkHarmonyBar:SetPoint("TOP", player, "BOTTOM", 0, 18)
 --      I think I sharded in my pants      --
 ---------------------------------------------
 
-ShardBarFrame:SetParent(player)
-ShardBarFrame:ClearAllPoints()
-ShardBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
-
-BurningEmbersBarFrame:SetParent(player)
-BurningEmbersBarFrame:ClearAllPoints()
-BurningEmbersBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
+WarlockPowerFrame:SetParent(player)
+WarlockPowerFrame:ClearAllPoints()
+WarlockPowerFrame:SetPoint("TOP", player, "BOTTOM", 0, 2)
 
 
 --------------------------
