@@ -31,7 +31,7 @@ end
 local PostUpdateHealth = function(self, unit, bar, min, max)
 	self = self.hpparent or self
 	local color = self.istankframe and UnitExists("focus") and UnitIsUnit(unit, "focus") and focus_highlight or
-		not UnitIsDeadOrGhost(unit) and (not UnitIsTapped(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')]
+		not UnitIsDeadOrGhost(unit) and (not UnitIsTapDenied(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')]
 		or gray
 	self:SetBackdropBorderColor(color.r, color.g, color.b)
 end
