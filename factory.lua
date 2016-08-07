@@ -349,6 +349,49 @@ local func = function(settings, self, unit, isSingle)
 		combat:SetTexture([[Interface\CharacterFrame\UI-StateIcon]])
 		combat:SetTexCoord(1/2, 1, 0.01, 0.5)
 		self.Combat = combat
+
+		local _, myclass = UnitClass("player")
+		local icons = {}
+		local atlas
+		if myclass == "MAGE" then
+			atlas = "Mage-ArcaneCharge"
+		end
+
+		function icons:UpdateTexture() end
+
+		function icons:PostUpdate(cur, max, hasMaxChanged, powerType, event)
+			if event == "ClassPowerDisable" then return end
+			for i=1,max do
+				local icon = self[i]
+				if i > cur then
+					icon:Show()
+					icon:SetAlpha(0.3)
+				else
+					icon:SetAlpha(1)
+				end
+			end
+		end
+
+		for index = 1, 6 do
+			local icon = self:CreateTexture(nil, "BACKGROUND")
+
+			-- Position and size.
+			icon:SetSize(16, 16)
+			icon:SetPoint("TOPLEFT", self, "BOTTOMLEFT", index * 16, 0)
+
+			-- Set texture
+			if atlas then icon:SetAtlas(atlas) end
+
+			if myclass == "PALADIN" then
+				icon:SetTexture("Interface\\PlayerFrame\\PaladinPowerTextures")
+				icon:SetTexCoord(0.28125000, 0.38671875, 0.64843750, 0.81250000)
+			end
+
+			icons[index] = icon
+    end
+
+    -- Register with oUF
+    self.ClassIcons = icons
 	end
 
 	local phase = self:CreateTexture(nil, "ARTWORK")
