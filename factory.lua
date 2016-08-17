@@ -201,7 +201,7 @@ local func = function(settings, self, unit, isSingle)
 		info:SetPoint("RIGHT", ppp, "LEFT", -2, 0)
 		info:SetJustifyH"LEFT"
 		info:SetTextColor(1, 1, 1)
-		self:Tag(info, "[difficulty][smartlevel][ >rare] [raidcolor][smartclass]")
+		self:Tag(info, "[difficulty][teklevel][ >rare][ >tekquest] [raidcolor][smartclass]")
 
 		local cast = CreateFrame"StatusBar"
 		cast:SetWidth(width - 16 -14)

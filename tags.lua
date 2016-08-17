@@ -17,6 +17,30 @@ oUF.Tags.Methods["tekhp2"] = function(u) local c, m = UnitHealth(u), UnitHealthM
 oUF.Tags.Events["tekpet"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
 oUF.Tags.Methods["tekpet"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return _TAGS["name"](u) end end
 
+oUF.Tags.Events["tekminus"] = "UNIT_CLASSIFICATION_CHANGED"
+oUF.Tags.Methods["tekminus"] = function(u) local c = UnitClassification(u); if c == "minus" then return "-" end end
+
+oUF.Tags.Events["tekquest"] = "UNIT_CLASSIFICATION_CHANGED"
+oUF.Tags.Methods["tekquest"] = function(u) if UnitIsQuestBoss(u) then return "Quest" end end
+
+oUF.Tags.Events["teklevel"] = "UNIT_LEVEL PLAYER_LEVEL_UP UNIT_CLASSIFICATION_CHANGED"
+oUF.Tags.Methods["teklevel"] = function(u)
+	local c = UnitClassification(u)
+	if c == "worldboss" then
+		return "Boss"
+	else
+		local plusminus = _TAGS["plus"](u)
+		if not plusminus then plusminus = _TAGS["tekminus"](u) end
+		local level = _TAGS["level"](u)
+		if (plusminus) then
+			return level.. plusminus
+		else
+			return level
+		end
+	end
+end
+
+
 
 oUF.Tags.Methods["teksacs"]   = function(u) if UnitAura(u, "Sacred Shield")          then return "|cffFFAA00SS|r" end end
 oUF.Tags.Methods["tekbol"]    = function(u) if UnitAura(u, "Beacon of Light")        then return "|cffFFD800BoL|r" end end
