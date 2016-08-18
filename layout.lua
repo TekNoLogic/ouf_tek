@@ -124,24 +124,6 @@ EclipseBarFrame:ClearAllPoints()
 EclipseBarFrame:SetPoint("CENTER")
 
 
--------------------------
---      HOLY POWA      --
--------------------------
-
-PaladinPowerBar:SetParent(player)
-PaladinPowerBar:ClearAllPoints()
-PaladinPowerBar:SetPoint("TOP", player, "BOTTOM", 0, 7)
-
-
---------------------------
---      Holy balls      --
---------------------------
-
-PriestBarFrame:SetParent(player)
-PriestBarFrame:ClearAllPoints()
-PriestBarFrame:SetPoint("TOP", player, "BOTTOM", 0, 4)
-
-
 --------------------------
 --      Phase icon      --
 --------------------------
