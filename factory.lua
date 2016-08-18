@@ -355,6 +355,10 @@ local func = function(settings, self, unit, isSingle)
 		local atlas
 		if myclass == "MAGE" then
 			atlas = "Mage-ArcaneCharge"
+		elseif myclass == "MONK" then
+			atlas = "MonkUI-LightOrb"
+		elseif myclass == "WARLOCK" then
+			atlas = "nameplate-WarlockShard-On"
 		end
 
 		function icons:UpdateTexture() end
