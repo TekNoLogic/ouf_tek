@@ -28,11 +28,17 @@ local menu = function(self)
 	end
 end
 
+local function GetBorderColor(self, unit)
+	if self.istankframe and UnitExists("focus") and UnitIsUnit(unit, "focus") then
+		return focus_highlight
+	elseif not (UnitIsDeadOrGhost(unit) or UnitIsTapDenied(unit)) then
+		return UnitReactionColor[UnitReaction(unit, 'player')]
+	end
+end
+
 local PostUpdateHealth = function(self, unit, bar, min, max)
 	self = self.hpparent or self
-	local color = self.istankframe and UnitExists("focus") and UnitIsUnit(unit, "focus") and focus_highlight or
-		not UnitIsDeadOrGhost(unit) and (not UnitIsTapDenied(unit) or UnitIsTappedByPlayer(unit)) and UnitReactionColor[UnitReaction(unit, 'player')]
-		or gray
+	local color = GetBorderColor(self, unit) or gray
 	self:SetBackdropBorderColor(color.r, color.g, color.b)
 end
 local function Update_Focus_Highlight(self, event, ...) PostUpdateHealth(self, self.unit) end
