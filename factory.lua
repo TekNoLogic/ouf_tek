@@ -192,6 +192,7 @@ local func = function(settings, self, unit, isSingle)
 	else
 		hp:SetHeight(14)
 		pp:SetHeight(14)
+		pp:SetPoint("TOP", 0, -25)
 		pp.colorPower = true
 		pp.frequentUpdates = true
 
@@ -355,6 +356,30 @@ local func = function(settings, self, unit, isSingle)
 		combat:SetTexture([[Interface\CharacterFrame\UI-StateIcon]])
 		combat:SetTexCoord(1/2, 1, 0.01, 0.5)
 		self.Combat = combat
+
+		local dm = CreateFrame("StatusBar")
+		dm:SetStatusBarTexture(texture)
+		dm:SetParent(self)
+		dm:SetHeight(4)
+		dm:SetPoint("TOPLEFT", pp, "BOTTOMLEFT", 0, -1)
+		dm:SetPoint("TOPRIGHT", pp, "BOTTOMRIGHT", 0, -1)
+		dm.colorSmooth = true
+		dm.smoothGradient = {
+			1, 0, 0,
+			1, 1, 0,
+			0, 1, 1,
+			0, 0, 1,
+		}
+		dm:SetScript("OnShow", function() pp:SetHeight(10) end)
+		dm:SetScript("OnHide", function() pp:SetHeight(14) end)
+		dm:Hide()
+		self.DruidMana = dm
+
+		local dmbg = dm:CreateTexture(nil, "BORDER")
+		dmbg:SetAllPoints(dm)
+		dmbg:SetTexture(texture)
+		dmbg.multiplier = .5
+		dm.bg = dmbg
 
 		local _, myclass = UnitClass("player")
 		local icons = {}
