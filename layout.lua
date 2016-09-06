@@ -36,6 +36,9 @@ pet:SetPoint('BOTTOMRIGHT', player, 'TOPRIGHT')
 local focus = oUF:Spawn("focus")
 focus:SetPoint("BOTTOMLEFT", target, "TOPLEFT")
 
+local focustarget = oUF:Spawn("focustarget")
+focustarget:SetPoint("LEFT", focus, "RIGHT")
+
 
 ----------------------------
 --      Party frames      --
