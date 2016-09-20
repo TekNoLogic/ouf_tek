@@ -336,10 +336,48 @@ local func = function(settings, self, unit, isSingle)
 	local pvp = self:CreateTexture(nil, "OVERLAY")
 	pvp:SetHeight(32)
 	pvp:SetWidth(32)
-	if settings.size then pvp:SetPoint("CENTER", self, "LEFT", 6, -6) else pvp:SetPoint("CENTER", self, "BOTTOMLEFT", 12, 0) end
+	if settings.size then
+		pvp:SetPoint("CENTER", self, "LEFT", 6, -6)
+	else
+		pvp:SetPoint("CENTER", self, "BOTTOMLEFT", 12, 0)
+	end
+
 	self.PvP = pvp
 
 	if unit == "player" then
+		-- PvP details
+		local pvpframe = CreateFrame("Frame", nil, self)
+		pvpframe:SetHeight(32)
+		pvpframe:SetWidth(32)
+		pvpframe:SetPoint("CENTER", self, "BOTTOMLEFT", 12, 0)
+
+		pvp:SetParent(pvpframe)
+		function pvpframe:SetTexture(...) pvp:SetTexture(...) end
+
+		local pvptime = pvpframe:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+		pvptime:SetPoint("BOTTOMRIGHT", pvpframe, "LEFT", 4, 0)
+
+		pvpframe:SetScript("OnUpdate", function()
+			local endtime = GetPVPTimer()
+			local now = GetTime()
+			if not endtime then return end
+
+			if endtime > 300000 then
+				pvptime:SetText("∞")
+			else
+				local minutes = math.floor(endtime/1000/60)
+				local seconds = math.floor(endtime/1000) % 60
+				pvptime:SetText(("%d:%02d"):format(minutes, seconds))
+				-- if minutes > 0 then
+				-- else
+				-- 	pvptime:SetText(seconds.. "s")
+				-- end
+			end
+		end)
+
+		self.PvP = pvpframe
+
+
 		-- Resting icon
 		local rest = self:CreateTexture(nil, "OVERLAY")
 		rest:SetHeight(24)
