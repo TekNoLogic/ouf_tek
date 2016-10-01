@@ -1,18 +1,38 @@
 
 local myname, ns = ...
-TEKX = ns
 local oUF = ns.oUF
+
+
+local function FormatNumber(num)
+	if num > 1000 then
+		num = math.floor(num / 1000)
+		return BreakUpLargeNumbers(num).. "k"
+	end
+	return BreakUpLargeNumbers(num)
+end
 
 
 oUF.Tags.Events["tekpp"] = "UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER"
 oUF.Tags.Methods["tekpp"] = function(u) local c, m = UnitPower(u), UnitPowerMax(u) return c >= m and m ~= 100 and _TAGS["maxpp"](u) or _TAGS["perpp"](u).."%" end
 
 oUF.Tags.Events["tekhp"] = "UNIT_HEALTH UNIT_MAXHEALTH"
-oUF.Tags.Methods["tekhp"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) return (c <= 1 or not UnitIsConnected(u)) and "" or c >= m and _TAGS["maxhp"](u)
-	or UnitCanAttack("player", u) and _TAGS["perhp"](u).."%" or "-".._TAGS["missinghp"](u) end
+oUF.Tags.Methods["tekhp"] = function(u)
+	local c, m = UnitHealth(u), UnitHealthMax(u)
+	if c <= 1 or not UnitIsConnected(u) then return "" end
+	if c >= m then return FormatNumber(m) end
+	if UnitCanAttack("player", u) then return _TAGS["perhp"](u).."%" end
+	return "-".. FormatNumber(m - c)
+end
 
 oUF.Tags.Events["tekhp2"] = "UNIT_HEALTH UNIT_MAXHEALTH"
-oUF.Tags.Methods["tekhp2"] = function(u) local c, m = UnitHealth(u), UnitHealthMax(u) if c == 0 then return "Dead" elseif c < m then return "-".._TAGS["missinghp"](u) end end
+oUF.Tags.Methods["tekhp2"] = function(u)
+	local c, m = UnitHealth(u), UnitHealthMax(u)
+	if c == 0 then
+		return "Dead"
+	elseif c < m then
+		return "-".._TAGS["missinghp"](u)
+	end
+end
 
 oUF.Tags.Events["tekpet"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
 oUF.Tags.Methods["tekpet"] = function(u) if UnitHealth(u) >= UnitHealthMax(u) then return _TAGS["name"](u) end end
